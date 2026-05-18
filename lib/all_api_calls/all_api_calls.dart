@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../base_api/base_api.dart';
 import '../api_url.dart';
 import '../models/Category_model/GetCatgoryModel.dart';
@@ -50,11 +51,18 @@ class AllApiCalls {
     return jsonDecode(response.body);
   }
 
-  // Fixed: API expects POST (multipart formdata), using POST here
-  Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> data) async {
-    final response = await _baseApi.post(
+  /// Update profile using multipart/form-data (supports file uploads).
+  /// [textFields]: text fields (name, email, contact, site_name, footer, address)
+  /// [imageFiles]: map of field-name → MultipartFile (image, fav_icon, logo_dark, logo_light)
+  Future<Map<String, dynamic>> updateProfile(
+    Map<String, String> textFields, {
+    Map<String, http.MultipartFile>? imageFiles,
+  }) async {
+    final files = imageFiles?.values.toList();
+    final response = await _baseApi.postMultipart(
       _path(ApiUrls.updateProfile),
-      body: data,
+      fields: textFields,
+      files: files,
     );
     return jsonDecode(response.body);
   }
@@ -83,10 +91,15 @@ class AllApiCalls {
     return GetCatgoryModel.fromJson(jsonDecode(response.body));
   }
 
-  Future<CreateCategoryModel> createCategory(Map<String, dynamic> data) async {
-    final response = await _baseApi.post(
+  /// Create category with multipart (name, skubar_code, image file required).
+  Future<CreateCategoryModel> createCategory(
+    Map<String, String> textFields, {
+    http.MultipartFile? imageFile,
+  }) async {
+    final response = await _baseApi.postMultipart(
       _path(ApiUrls.categoryCreate),
-      body: data,
+      fields: textFields,
+      files: imageFile != null ? [imageFile] : [],
     );
     return CreateCategoryModel.fromJson(jsonDecode(response.body));
   }
@@ -98,10 +111,19 @@ class AllApiCalls {
     return GetCatgoryModel.fromJson(jsonDecode(response.body));
   }
 
-  Future<UpdateCategoryModel> updateCategory(int id, Map<String, dynamic> data) async {
-    final response = await _baseApi.post(
+  /// Update category with multipart + _method=PUT (Laravel method spoofing).
+  Future<UpdateCategoryModel> updateCategory(
+    int id,
+    Map<String, String> textFields, {
+    http.MultipartFile? imageFile,
+  }) async {
+    // Laravel requires _method=PUT for multipart PUT via POST route
+    final fields = Map<String, String>.from(textFields);
+    fields['_method'] = 'PUT';
+    final response = await _baseApi.postMultipart(
       _path(ApiUrls.categoryUpdate(id)),
-      body: data,
+      fields: fields,
+      files: imageFile != null ? [imageFile] : [],
     );
     return UpdateCategoryModel.fromJson(jsonDecode(response.body));
   }
@@ -121,10 +143,16 @@ class AllApiCalls {
     return GetproductModel.fromJson(jsonDecode(response.body));
   }
 
-  Future<CreateProductModel> createProduct(Map<String, dynamic> data) async {
-    final response = await _baseApi.post(
+  /// Create product with multipart (name, category, qnty, weight_in_gram,
+  /// cost_per_gram, sts, for_sale, sell_price optional, image file).
+  Future<CreateProductModel> createProduct(
+    Map<String, String> textFields, {
+    http.MultipartFile? imageFile,
+  }) async {
+    final response = await _baseApi.postMultipart(
       _path(ApiUrls.productCreate),
-      body: data,
+      fields: textFields,
+      files: imageFile != null ? [imageFile] : [],
     );
     return CreateProductModel.fromJson(jsonDecode(response.body));
   }
@@ -136,10 +164,18 @@ class AllApiCalls {
     return GetproductModel.fromJson(jsonDecode(response.body));
   }
 
-  Future<UpdateProductModel> updateProduct(int id, Map<String, dynamic> data) async {
-    final response = await _baseApi.post(
+  /// Update product with multipart + _method=PUT (Laravel method spoofing).
+  Future<UpdateProductModel> updateProduct(
+    int id,
+    Map<String, String> textFields, {
+    http.MultipartFile? imageFile,
+  }) async {
+    final fields = Map<String, String>.from(textFields);
+    fields['_method'] = 'PUT';
+    final response = await _baseApi.postMultipart(
       _path(ApiUrls.productUpdate(id)),
-      body: data,
+      fields: fields,
+      files: imageFile != null ? [imageFile] : [],
     );
     return UpdateProductModel.fromJson(jsonDecode(response.body));
   }
@@ -227,7 +263,6 @@ class AllApiCalls {
     return jsonDecode(response.body);
   }
 
-  // Fixed: API uses PUT, and markNotificationRead is now a function
   Future<Map<String, dynamic>> markNotificationRead(int id) async {
     final response = await _baseApi.put(
       _path(ApiUrls.markNotificationRead(id)),
@@ -235,7 +270,6 @@ class AllApiCalls {
     return jsonDecode(response.body);
   }
 
-  // Fixed: API uses PUT
   Future<Map<String, dynamic>> markAllNotificationsRead() async {
     final response = await _baseApi.put(
       _path(ApiUrls.markAllNotificationsRead),
@@ -243,7 +277,6 @@ class AllApiCalls {
     return jsonDecode(response.body);
   }
 
-  // Fixed: notificationDelete is now a function
   Future<Map<String, dynamic>> deleteNotification(int id) async {
     final response = await _baseApi.delete(
       _path(ApiUrls.notificationDelete(id)),

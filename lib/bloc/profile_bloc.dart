@@ -32,7 +32,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ) async {
     emit(state.copyWith(isLoading: true, error: null));
     try {
-      final updated = await _apiCalls.updateProfile(event.data);
+      final updated = await _apiCalls.updateProfile(
+        event.fields,
+        imageFiles: event.imageFiles,
+      );
       emit(state.copyWith(isLoading: false, profileDetails: updated));
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: e.toString()));

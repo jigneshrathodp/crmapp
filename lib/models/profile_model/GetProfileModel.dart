@@ -7,19 +7,19 @@ class GetProfileModel {
 
   GetProfileModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
-    user = json['user'] != null ? new User.fromJson(json['user']) : null;
+    user = json['user'] != null ? User.fromJson(json['user']) : null;
     details =
-    json['details'] != null ? new Details.fromJson(json['details']) : null;
+    json['details'] != null ? Details.fromJson(json['details']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    if (this.user != null) {
-      data['user'] = this.user!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    if (user != null) {
+      data['user'] = user!.toJson();
     }
-    if (this.details != null) {
-      data['details'] = this.details!.toJson();
+    if (details != null) {
+      data['details'] = details!.toJson();
     }
     return data;
   }
@@ -43,12 +43,12 @@ class User {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['name'] = this.name;
-    data['email'] = this.email;
-    data['contact'] = this.contact;
-    data['image'] = this.image;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    data['email'] = email;
+    data['contact'] = contact;
+    data['image'] = image;
     return data;
   }
 }
@@ -79,7 +79,7 @@ class Details {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['site_name'] = siteName;
     data['fav_icon'] = favIcon;
     data['logo_light'] = logoLight;

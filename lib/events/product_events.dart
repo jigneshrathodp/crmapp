@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:http/http.dart' as http;
 
 // Events
 abstract class ProductEvent extends Equatable {
@@ -11,22 +12,24 @@ abstract class ProductEvent extends Equatable {
 class GetProductList extends ProductEvent {}
 
 class CreateProduct extends ProductEvent {
-  final Map<String, dynamic> data;
+  final Map<String, String> fields;
+  final http.MultipartFile? imageFile;
 
-  const CreateProduct(this.data);
+  const CreateProduct(this.fields, {this.imageFile});
 
   @override
-  List<Object?> get props => [data];
+  List<Object?> get props => [fields];
 }
 
 class UpdateProduct extends ProductEvent {
   final int id;
-  final Map<String, dynamic> data;
+  final Map<String, String> fields;
+  final http.MultipartFile? imageFile;
 
-  const UpdateProduct(this.id, this.data);
+  const UpdateProduct(this.id, this.fields, {this.imageFile});
 
   @override
-  List<Object?> get props => [id, data];
+  List<Object?> get props => [id, fields];
 }
 
 class DeleteProduct extends ProductEvent {

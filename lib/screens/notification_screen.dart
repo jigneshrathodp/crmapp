@@ -5,7 +5,8 @@ import '../events/notification_events.dart';
 import '../states/notification_state.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_drawer.dart';
-import 'profile_screen.dart';
+import 'profile/profile_screen.dart';
+import '../utils/navigation_mixin.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -15,7 +16,7 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, DrawerNavigationMixin {
   late TabController _tabController;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -89,9 +90,7 @@ class _NotificationScreenState extends State<NotificationScreen>
       ),
       drawer: CustomDrawer(
         selectedIndex: 9,
-        onItemTapped: (index) {
-          Navigator.pushReplacementNamed(context, _indexToRoute(index));
-        },
+        onItemTapped: onDrawerItemTapped,
         headerTitle: 'CRM App',
         headerSubtitle: 'Notifications',
       ),
@@ -137,32 +136,6 @@ class _NotificationScreenState extends State<NotificationScreen>
     );
   }
 
-  String _indexToRoute(int index) {
-    switch (index) {
-      case 0:
-        return '/dashboard';
-      case 1:
-      case 2:
-        return '/orders';
-      case 3:
-      case 4:
-        return '/products';
-      case 5:
-      case 6:
-        return '/categories';
-      case 7:
-      case 8:
-        return '/advertisements';
-      case 9:
-        return '/notifications';
-      case 10:
-      case 11:
-      case 12:
-        return '/profile';
-      default:
-        return '/dashboard';
-    }
-  }
 
   Widget _buildNotificationList(
     List<dynamic> notifications, {

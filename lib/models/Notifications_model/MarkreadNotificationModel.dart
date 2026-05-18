@@ -11,7 +11,7 @@ class MarkreadNotificationModel {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
-    data['status'] = this.status;
+    data['status'] = status;
     if (this.data != null) {
       data['data'] = this.data!.toJson();
     }
@@ -40,14 +40,14 @@ class Data {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
-    data['id'] = this.id;
-    data['type'] = this.type;
-    data['status'] = this.status;
-    if (this.advertise != null) {
-      data['advertise'] = this.advertise!.toJson();
+    data['id'] = id;
+    data['type'] = type;
+    data['status'] = status;
+    if (advertise != null) {
+      data['advertise'] = advertise!.toJson();
     }
-    if (this.order != null) {
-      data['order'] = this.order!.toJson();
+    if (order != null) {
+      data['order'] = order!.toJson();
     }
     return data;
   }

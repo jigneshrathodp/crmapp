@@ -1,10 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../bloc/product_bloc.dart';
-import '../events/product_events.dart';
-import '../states/product_state.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import '../../bloc/product_bloc.dart';
+import '../../events/product_events.dart';
+import '../../states/product_state.dart';
 
-class ProductViewScreen extends StatefulWidget {
+class UpdateProductScreen extends StatefulWidget {
   final int productId;
   final String? productName;
   final String? productSku;
@@ -13,8 +16,12 @@ class ProductViewScreen extends StatefulWidget {
   final String? sellPrice;
   final String? weightInGram;
   final String? costPerGram;
+  final String? totalCost;
+  final String? image;
+  final int? active;
+  final int? forSale;
 
-  const ProductViewScreen({
+  const UpdateProductScreen({
     super.key,
     required this.productId,
     this.productName,
@@ -24,13 +31,17 @@ class ProductViewScreen extends StatefulWidget {
     this.sellPrice,
     this.weightInGram,
     this.costPerGram,
+    this.totalCost,
+    this.image,
+    this.active,
+    this.forSale,
   });
 
   @override
-  State<ProductViewScreen> createState() => _ProductViewScreenState();
+  State<UpdateProductScreen> createState() => _UpdateProductScreenState();
 }
 
-class _ProductViewScreenState extends State<ProductViewScreen> {
+class _UpdateProductScreenState extends State<UpdateProductScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _categoryController;
@@ -38,6 +49,10 @@ class _ProductViewScreenState extends State<ProductViewScreen> {
   late TextEditingController _weightInGramController;
   late TextEditingController _costPerGramController;
   late TextEditingController _sellPriceController;
+  late bool _isActive;
+  late bool _forSale;
+  File? _newImage;
+  final _picker = ImagePicker();
 
   @override
   void initState() {
@@ -48,6 +63,8 @@ class _ProductViewScreenState extends State<ProductViewScreen> {
     _weightInGramController = TextEditingController(text: widget.weightInGram ?? '');
     _costPerGramController = TextEditingController(text: widget.costPerGram ?? '');
     _sellPriceController = TextEditingController(text: widget.sellPrice ?? '');
+    _isActive = (widget.active ?? 1) == 1;
+    _forSale = (widget.forSale ?? 1) == 1;
   }
 
   @override
@@ -61,20 +78,36 @@ class _ProductViewScreenState extends State<ProductViewScreen> {
     super.dispose();
   }
 
-  void _updateProduct() {
+  Future<void> _pickImage() async {
+    final picked = await _picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      setState(() => _newImage = File(picked.path));
+    }
+  }
+
+  Future<void> _updateProduct() async {
     if (_formKey.currentState!.validate()) {
+      http.MultipartFile? imageFile;
+      if (_newImage != null) {
+        imageFile = await http.MultipartFile.fromPath('image', _newImage!.path);
+      }
+      if (!mounted) return;
+
+      final fields = <String, String>{
+        'name': _nameController.text,
+        'category': _categoryController.text,
+        'qnty': _qntyController.text,
+        'weight_in_gram': _weightInGramController.text,
+        'cost_per_gram': _costPerGramController.text,
+        'sts': _isActive ? '1' : '0',
+        'for_sale': _forSale ? '1' : '0',
+      };
+      if (_sellPriceController.text.isNotEmpty) {
+        fields['sell_price'] = _sellPriceController.text;
+      }
+
       context.read<ProductBloc>().add(
-        UpdateProduct(widget.productId, {
-          'name': _nameController.text,
-          // Fixed: API uses 'category' and 'qnty', and requires _method: PUT
-          'category': _categoryController.text,
-          'qnty': _qntyController.text,
-          'weight_in_gram': _weightInGramController.text,
-          'cost_per_gram': _costPerGramController.text,
-          if (_sellPriceController.text.isNotEmpty)
-            'sell_price': _sellPriceController.text,
-          '_method': 'PUT',
-        }),
+        UpdateProduct(widget.productId, fields, imageFile: imageFile),
       );
       Navigator.pop(context);
     }
@@ -84,7 +117,7 @@ class _ProductViewScreenState extends State<ProductViewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('View/Update Product'),
+        title: const Text('Update Product'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 1,
@@ -108,6 +141,46 @@ class _ProductViewScreenState extends State<ProductViewScreen> {
             key: _formKey,
             child: ListView(
               children: [
+                // Image preview / picker
+                GestureDetector(
+                  onTap: _pickImage,
+                  child: Container(
+                    height: 160,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: _newImage != null
+                          ? Image.file(_newImage!, fit: BoxFit.cover)
+                          : (widget.image != null && widget.image!.isNotEmpty
+                              ? Image.network(
+                                  widget.image!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, _, _) =>
+                                      const Icon(Icons.image, size: 60),
+                                )
+                              : const Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.add_photo_alternate,
+                                        size: 48, color: Colors.grey),
+                                    SizedBox(height: 8),
+                                    Text('Tap to select image (optional)',
+                                        style: TextStyle(color: Colors.grey)),
+                                  ],
+                                )),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Tap image to change (optional)',
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+                const SizedBox(height: 12),
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(labelText: 'Name'),
@@ -148,6 +221,16 @@ class _ProductViewScreenState extends State<ProductViewScreen> {
                     labelText: 'Sell Price (optional)',
                   ),
                   keyboardType: TextInputType.number,
+                ),
+                SwitchListTile(
+                  title: const Text('Active'),
+                  value: _isActive,
+                  onChanged: (val) => setState(() => _isActive = val),
+                ),
+                SwitchListTile(
+                  title: const Text('For Sale'),
+                  value: _forSale,
+                  onChanged: (val) => setState(() => _forSale = val),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(

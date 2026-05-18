@@ -14,12 +14,12 @@ import 'bloc/profile_bloc.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
-import 'screens/category_screen.dart';
-import 'screens/product_screen.dart';
-import 'screens/order_screen.dart';
-import 'screens/advertise_screen.dart';
-import 'screens/profile_screen.dart';
 import 'screens/notification_screen.dart';
+import 'screens/profile/profile_screen.dart';
+import 'screens/category/category_list_screen.dart';
+import 'screens/product/product_list_screen.dart';
+import 'screens/order/order_list_screen.dart';
+import 'screens/ads/ads_list_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -57,10 +57,10 @@ class MyApp extends StatelessWidget {
           '/': (context) => const SplashScreen(),
           '/login': (context) => const LoginScreen(),
           '/dashboard': (context) => const DashboardScreen(),
-          '/categories': (context) => const CategoryScreen(),
-          '/products': (context) => const ProductScreen(),
-          '/orders': (context) => const OrderScreen(),
-          '/advertisements': (context) => const AdvertiseScreen(),
+          '/categories': (context) => const CategoryListScreen(),
+          '/products': (context) => const ProductListScreen(),
+          '/orders': (context) => const OrderListScreen(),
+          '/advertisements': (context) => const AdsListScreen(),
           '/profile': (context) => const ProfileScreen(),
           '/notifications': (context) => const NotificationScreen(),
         },

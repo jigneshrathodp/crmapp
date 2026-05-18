@@ -12,9 +12,9 @@ class CreateAdvertiseModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data =  Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
+    final Map<String, dynamic> data =  <String, dynamic>{};
+    data['status'] = status;
+    data['message'] = message;
     if (this.data != null) {
       data['data'] = this.data!.toJson();
     }
@@ -43,13 +43,13 @@ class Data {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['date'] = this.date;
-    data['title'] = this.title;
-    data['price'] = this.price;
-    data['url'] = this.url;
-    data['socialmedia'] = this.socialmedia;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['date'] = date;
+    data['title'] = title;
+    data['price'] = price;
+    data['url'] = url;
+    data['socialmedia'] = socialmedia;
     return data;
   }
 }

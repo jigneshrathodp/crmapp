@@ -9,14 +9,14 @@ class GetproductModel {
     if (json['data'] != null) {
       data = <Data>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        data!.add(Data.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
@@ -68,19 +68,19 @@ class Data {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['category_id'] = this.categoryId;
-    data['name'] = this.name;
-    data['sku'] = this.sku;
-    data['quantity'] = this.quantity;
-    data['sell_price'] = this.sellPrice;
-    data['weight_in_gram'] = this.weightInGram;
-    data['cost_per_gram'] = this.costPerGram;
-    data['total_cost'] = this.totalCost;
-    data['image'] = this.image;
-    data['active'] = this.active;
-    data['for_sale'] = this.forSale;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['category_id'] = categoryId;
+    data['name'] = name;
+    data['sku'] = sku;
+    data['quantity'] = quantity;
+    data['sell_price'] = sellPrice;
+    data['weight_in_gram'] = weightInGram;
+    data['cost_per_gram'] = costPerGram;
+    data['total_cost'] = totalCost;
+    data['image'] = image;
+    data['active'] = active;
+    data['for_sale'] = forSale;
     return data;
   }
 }

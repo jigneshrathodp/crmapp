@@ -8,13 +8,13 @@ class GetDashboardModel {
   GetDashboardModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
-    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
+    data = json['data'] != null ? Data.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['message'] = message;
     if (this.data != null) {
       data['data'] = this.data!.toJson();
     }
@@ -36,17 +36,17 @@ class NotificationData {
     type = json['type'];
     status = json['status'];
     advertise = json['advertise'];
-    order = json['order_controller'] != null ? new Order.fromJson(json['order_controller']) : null;
+    order = json['order'] != null ? Order.fromJson(json['order']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['type'] = this.type;
-    data['status'] = this.status;
-    data['advertise'] = this.advertise;
-    if (this.order != null) {
-      data['order_controller'] = this.order!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['type'] = type;
+    data['status'] = status;
+    data['advertise'] = advertise;
+    if (order != null) {
+      data['order'] = order!.toJson();
     }
     return data;
   }
@@ -64,9 +64,9 @@ class Order {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['customer_name'] = this.customerName;
-    data['email'] = this.email;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['customer_name'] = customerName;
+    data['email'] = email;
     return data;
   }
 }
@@ -80,33 +80,33 @@ class Data {
   Data({this.stats, this.profile, this.notifications, this.details});
 
   Data.fromJson(Map<String, dynamic> json) {
-    stats = json['stats'] != null ? new Stats.fromJson(json['stats']) : null;
+    stats = json['stats'] != null ? Stats.fromJson(json['stats']) : null;
     profile =
-    json['profile'] != null ? new Profile.fromJson(json['profile']) : null;
+    json['profile'] != null ? Profile.fromJson(json['profile']) : null;
     if (json['notifications'] != null) {
       notifications = <NotificationData>[];
       json['notifications'].forEach((v) {
-        notifications!.add(new NotificationData.fromJson(v));
+        notifications!.add(NotificationData.fromJson(v));
       });
     }
     details =
-    json['details'] != null ? new Details.fromJson(json['details']) : null;
+    json['details'] != null ? Details.fromJson(json['details']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.stats != null) {
-      data['stats'] = this.stats!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (stats != null) {
+      data['stats'] = stats!.toJson();
     }
-    if (this.profile != null) {
-      data['profile'] = this.profile!.toJson();
+    if (profile != null) {
+      data['profile'] = profile!.toJson();
     }
-    if (this.notifications != null) {
+    if (notifications != null) {
       data['notifications'] =
-          this.notifications!.map((v) => v.toJson()).toList();
+          notifications!.map((v) => v.toJson()).toList();
     }
-    if (this.details != null) {
-      data['details'] = this.details!.toJson();
+    if (details != null) {
+      data['details'] = details!.toJson();
     }
     return data;
   }
@@ -147,16 +147,16 @@ class Stats {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['total_categories'] = this.totalCategories;
-    data['total_products'] = this.totalProducts;
-    data['total_sold_products'] = this.totalSoldProducts;
-    data['total_orders'] = this.totalOrders;
-    data['current_month_orders'] = this.currentMonthOrders;
-    data['total_product_cost'] = this.totalProductCost;
-    data['total_sold_price'] = this.totalSoldPrice;
-    data['total_advertisements'] = this.totalAdvertisements;
-    data['total_advertise_price'] = this.totalAdvertisePrice;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['total_categories'] = totalCategories;
+    data['total_products'] = totalProducts;
+    data['total_sold_products'] = totalSoldProducts;
+    data['total_orders'] = totalOrders;
+    data['current_month_orders'] = currentMonthOrders;
+    data['total_product_cost'] = totalProductCost;
+    data['total_sold_price'] = totalSoldPrice;
+    data['total_advertisements'] = totalAdvertisements;
+    data['total_advertise_price'] = totalAdvertisePrice;
     return data;
   }
 }
@@ -187,13 +187,13 @@ class Profile {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['address'] = this.address;
-    data['site_name'] = this.siteName;
-    data['footer'] = this.footer;
-    data['logo_dark'] = this.logoDark;
-    data['logo_light'] = this.logoLight;
-    data['fav_icon'] = this.favIcon;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['address'] = address;
+    data['site_name'] = siteName;
+    data['footer'] = footer;
+    data['logo_dark'] = logoDark;
+    data['logo_light'] = logoLight;
+    data['fav_icon'] = favIcon;
     return data;
   }
 }
@@ -214,11 +214,11 @@ class Details {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['name'] = this.name;
-    data['email'] = this.email;
-    data['image'] = this.image;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    data['email'] = email;
+    data['image'] = image;
     return data;
   }
 }

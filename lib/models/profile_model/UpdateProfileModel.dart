@@ -9,20 +9,20 @@ class UpdateProfileModel {
   UpdateProfileModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
-    user = json['user'] != null ? new User.fromJson(json['user']) : null;
+    user = json['user'] != null ? User.fromJson(json['user']) : null;
     profile =
-    json['profile'] != null ? new Profile.fromJson(json['profile']) : null;
+    json['profile'] != null ? Profile.fromJson(json['profile']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
-    if (this.user != null) {
-      data['user'] = this.user!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['message'] = message;
+    if (user != null) {
+      data['user'] = user!.toJson();
     }
-    if (this.profile != null) {
-      data['profile'] = this.profile!.toJson();
+    if (profile != null) {
+      data['profile'] = profile!.toJson();
     }
     return data;
   }
@@ -46,12 +46,12 @@ class User {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['name'] = this.name;
-    data['email'] = this.email;
-    data['contact'] = this.contact;
-    data['image'] = this.image;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    data['email'] = email;
+    data['contact'] = contact;
+    data['image'] = image;
     return data;
   }
 }
@@ -82,13 +82,13 @@ class Profile {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['site_name'] = this.siteName;
-    data['fav_icon'] = this.favIcon;
-    data['logo_light'] = this.logoLight;
-    data['logo_dark'] = this.logoDark;
-    data['footer'] = this.footer;
-    data['address'] = this.address;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['site_name'] = siteName;
+    data['fav_icon'] = favIcon;
+    data['logo_light'] = logoLight;
+    data['logo_dark'] = logoDark;
+    data['footer'] = footer;
+    data['address'] = address;
     return data;
   }
 }

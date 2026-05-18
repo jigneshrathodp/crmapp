@@ -34,7 +34,10 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   ) async {
     emit(state.copyWith(isLoading: true, error: null));
     try {
-      final created = await _apiCalls.createCategory(event.data);
+      final created = await _apiCalls.createCategory(
+        event.fields,
+        imageFile: event.imageFile,
+      );
       emit(state.copyWith(isLoading: false, createdCategory: created));
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: e.toString()));
@@ -47,7 +50,11 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   ) async {
     emit(state.copyWith(isLoading: true, error: null));
     try {
-      final updated = await _apiCalls.updateCategory(event.id, event.data);
+      final updated = await _apiCalls.updateCategory(
+        event.id,
+        event.fields,
+        imageFile: event.imageFile,
+      );
       emit(state.copyWith(isLoading: false, updatedCategory: updated));
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: e.toString()));

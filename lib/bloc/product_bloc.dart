@@ -34,7 +34,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   ) async {
     emit(state.copyWith(isLoading: true, error: null));
     try {
-      final created = await _apiCalls.createProduct(event.data);
+      final created = await _apiCalls.createProduct(
+        event.fields,
+        imageFile: event.imageFile,
+      );
       emit(state.copyWith(isLoading: false, createdProduct: created));
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: e.toString()));
@@ -47,7 +50,11 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   ) async {
     emit(state.copyWith(isLoading: true, error: null));
     try {
-      final updated = await _apiCalls.updateProduct(event.id, event.data);
+      final updated = await _apiCalls.updateProduct(
+        event.id,
+        event.fields,
+        imageFile: event.imageFile,
+      );
       emit(state.copyWith(isLoading: false, updatedProduct: updated));
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: e.toString()));

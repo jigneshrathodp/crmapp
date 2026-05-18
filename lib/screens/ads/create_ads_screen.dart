@@ -1,39 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../bloc/advertise_bloc.dart';
-import '../events/advertise_events.dart';
-import '../states/advertise_state.dart';
+import '../../bloc/advertise_bloc.dart';
+import '../../events/advertise_events.dart';
+import '../../states/advertise_state.dart';
 
-class AdvertiseUpdateScreen extends StatefulWidget {
-  final int advertiseId;
-  final String? advertiseTitle;
-  // Fixed: replaced advertiseDescription with correct API fields
-  final String? advertiseDate;
-  final String? advertisePrice;
-  final String? advertiseUrl;
-  final String? advertiseSocialMedia;
-
-  const AdvertiseUpdateScreen({
-    super.key,
-    required this.advertiseId,
-    this.advertiseTitle,
-    this.advertiseDate,
-    this.advertisePrice,
-    this.advertiseUrl,
-    this.advertiseSocialMedia,
-  });
+class CreateAdsScreen extends StatefulWidget {
+  const CreateAdsScreen({super.key});
 
   @override
-  State<AdvertiseUpdateScreen> createState() => _AdvertiseUpdateScreenState();
+  State<CreateAdsScreen> createState() => _CreateAdsScreenState();
 }
 
-class _AdvertiseUpdateScreenState extends State<AdvertiseUpdateScreen> {
+class _CreateAdsScreenState extends State<CreateAdsScreen> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _titleController;
-  late TextEditingController _dateController;
-  late TextEditingController _priceController;
-  late TextEditingController _urlController;
-  late String _selectedSocialMedia;
+  final _titleController = TextEditingController();
+  final _priceController = TextEditingController();
+  final _urlController = TextEditingController();
+  final _dateController = TextEditingController();
+  // API requires: date, price, title, url, socialmedia
+  // socialmedia must be one of: facebook, instagram, twitter, threads, pinterest
+  String _selectedSocialMedia = 'facebook';
 
   final List<String> _socialMediaOptions = [
     'facebook',
@@ -44,32 +30,18 @@ class _AdvertiseUpdateScreenState extends State<AdvertiseUpdateScreen> {
   ];
 
   @override
-  void initState() {
-    super.initState();
-    _titleController = TextEditingController(text: widget.advertiseTitle ?? '');
-    _dateController = TextEditingController(text: widget.advertiseDate ?? '');
-    _priceController = TextEditingController(text: widget.advertisePrice ?? '');
-    _urlController = TextEditingController(text: widget.advertiseUrl ?? '');
-    _selectedSocialMedia =
-        (widget.advertiseSocialMedia != null &&
-                _socialMediaOptions.contains(widget.advertiseSocialMedia))
-            ? widget.advertiseSocialMedia!
-            : 'facebook';
-  }
-
-  @override
   void dispose() {
     _titleController.dispose();
-    _dateController.dispose();
     _priceController.dispose();
     _urlController.dispose();
+    _dateController.dispose();
     super.dispose();
   }
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.tryParse(_dateController.text) ?? DateTime.now(),
+      initialDate: DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
     );
@@ -79,12 +51,12 @@ class _AdvertiseUpdateScreenState extends State<AdvertiseUpdateScreen> {
     }
   }
 
-  void _updateAdvertise() {
+  void _submit() {
     if (_formKey.currentState!.validate()) {
       context.read<AdvertiseBloc>().add(
-        UpdateAdvertise(widget.advertiseId, {
-          'title': _titleController.text,
+        CreateAdvertise({
           'date': _dateController.text,
+          'title': _titleController.text,
           'price': _priceController.text,
           'url': _urlController.text,
           'socialmedia': _selectedSocialMedia,
@@ -98,24 +70,22 @@ class _AdvertiseUpdateScreenState extends State<AdvertiseUpdateScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Update Advertisement'),
+        title: const Text('Create Advertisement'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 1,
       ),
       body: BlocListener<AdvertiseBloc, AdvertiseState>(
         listener: (context, state) {
-          if (state.updatedAdvertise != null) {
+          if (!state.isLoading && state.error == null && state.createdAdvertise != null) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Advertisement updated successfully'),
-              ),
+              const SnackBar(content: Text('Advertisement created successfully')),
             );
           }
           if (state.error != null) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('Error: ${state.error}')));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: ${state.error}')),
+            );
           }
         },
         child: Padding(
@@ -170,10 +140,7 @@ class _AdvertiseUpdateScreenState extends State<AdvertiseUpdateScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _updateAdvertise,
-                  child: const Text('Update'),
-                ),
+                ElevatedButton(onPressed: _submit, child: const Text('Create')),
               ],
             ),
           ),

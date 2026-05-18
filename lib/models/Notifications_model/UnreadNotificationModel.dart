@@ -9,14 +9,14 @@ class UnreadNotificationModel {
     if (json['data'] != null) {
       data = <Data>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        data!.add(Data.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
@@ -38,21 +38,21 @@ class Data {
     type = json['type'];
     status = json['status'];
     advertise = json['advertise'] != null
-        ? new Advertise.fromJson(json['advertise'])
+        ? Advertise.fromJson(json['advertise'])
         : null;
-    order = json['order'] != null ? new Order.fromJson(json['order']) : null;
+    order = json['order'] != null ? Order.fromJson(json['order']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['type'] = this.type;
-    data['status'] = this.status;
-    if (this.advertise != null) {
-      data['advertise'] = this.advertise!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['type'] = type;
+    data['status'] = status;
+    if (advertise != null) {
+      data['advertise'] = advertise!.toJson();
     }
-    if (this.order != null) {
-      data['order'] = this.order!.toJson();
+    if (order != null) {
+      data['order'] = order!.toJson();
     }
     return data;
   }
@@ -72,10 +72,10 @@ class Advertise {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['title'] = this.title;
-    data['url'] = this.url;
-    data['socialmedia'] = this.socialmedia;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['title'] = title;
+    data['url'] = url;
+    data['socialmedia'] = socialmedia;
     return data;
   }
 }
@@ -92,9 +92,9 @@ class Order {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['customer_name'] = this.customerName;
-    data['email'] = this.email;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['customer_name'] = customerName;
+    data['email'] = email;
     return data;
   }
 }

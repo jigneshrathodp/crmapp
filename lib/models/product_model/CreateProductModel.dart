@@ -8,13 +8,13 @@ class CreateProductModel {
   CreateProductModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
-    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
+    data = json['data'] != null ? Data.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['message'] = message;
     if (this.data != null) {
       data['data'] = this.data!.toJson();
     }
@@ -66,19 +66,19 @@ class Data {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['category_id'] = this.categoryId;
-    data['name'] = this.name;
-    data['sku'] = this.sku;
-    data['quantity'] = this.quantity;
-    data['sell_price'] = this.sellPrice;
-    data['weight_in_gram'] = this.weightInGram;
-    data['cost_per_gram'] = this.costPerGram;
-    data['total_cost'] = this.totalCost;
-    data['image'] = this.image;
-    data['active'] = this.active;
-    data['for_sale'] = this.forSale;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['category_id'] = categoryId;
+    data['name'] = name;
+    data['sku'] = sku;
+    data['quantity'] = quantity;
+    data['sell_price'] = sellPrice;
+    data['weight_in_gram'] = weightInGram;
+    data['cost_per_gram'] = costPerGram;
+    data['total_cost'] = totalCost;
+    data['image'] = image;
+    data['active'] = active;
+    data['for_sale'] = forSale;
     return data;
   }
 }

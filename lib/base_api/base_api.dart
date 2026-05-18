@@ -40,7 +40,7 @@ class BaseApi {
     return response;
   }
 
-  // POST request
+  // POST request (JSON body)
   Future<http.Response> post(
     String endpoint, {
     Map<String, String>? headers,
@@ -62,7 +62,26 @@ class BaseApi {
     return response;
   }
 
-  // PUT request
+  // POST multipart/form-data request (for file uploads)
+  Future<http.Response> postMultipart(
+    String endpoint, {
+    Map<String, String>? fields,
+    List<http.MultipartFile>? files,
+  }) async {
+    final token = await _getToken();
+    final uri = Uri.parse('$baseUrl$endpoint');
+    final request = http.MultipartRequest('POST', uri);
+    request.headers['Accept'] = 'application/json';
+    if (token != null && token.isNotEmpty) {
+      request.headers['Authorization'] = 'Bearer $token';
+    }
+    if (fields != null) request.fields.addAll(fields);
+    if (files != null) request.files.addAll(files);
+    final streamedResponse = await request.send();
+    return http.Response.fromStream(streamedResponse);
+  }
+
+  // PUT request (JSON body)
   Future<http.Response> put(
     String endpoint, {
     Map<String, String>? headers,

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../bloc/order_bloc.dart';
-import '../events/order_events.dart';
-import '../states/order_state.dart';
+import '../../bloc/order_bloc.dart';
+import '../../events/order_events.dart';
+import '../../states/order_state.dart';
 
 class OrderDetailScreen extends StatefulWidget {
   final int orderId;
@@ -17,7 +17,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   @override
   void initState() {
     super.initState();
-    // Fixed: fetch order details on init
     context.read<OrderBloc>().add(GetOrderDetail(widget.orderId));
   }
 
