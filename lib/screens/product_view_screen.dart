@@ -83,7 +83,12 @@ class _ProductViewScreenState extends State<ProductViewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('View/Update Product')),
+      appBar: AppBar(
+        title: const Text('View/Update Product'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 1,
+      ),
       body: BlocListener<ProductBloc, ProductState>(
         listener: (context, state) {
           if (state.updatedProduct != null) {

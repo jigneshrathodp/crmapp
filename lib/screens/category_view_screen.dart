@@ -56,7 +56,12 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('View / Update Category')),
+      appBar: AppBar(
+        title: const Text('View / Update Category'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 1,
+      ),
       body: BlocListener<CategoryBloc, CategoryState>(
         listener: (context, state) {
           if (!state.isLoading && state.error == null && state.updatedCategory != null) {

@@ -1,31 +1,93 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../bloc/auth_bloc.dart';
-import '../events/auth_events.dart';
+import '../widgets/custom_app_bar.dart';
+import '../widgets/custom_drawer.dart';
 import 'category_screen.dart';
 import 'product_screen.dart';
 import 'order_screen.dart';
 import 'advertise_screen.dart';
+import 'notification_screen.dart';
+import 'profile_screen.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  void _onDrawerItemTapped(int index) {
+    switch (index) {
+      case 0: // Dashboard - already here
+        break;
+      case 1: // Order Now
+      case 2: // Order List
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const OrderScreen()),
+        );
+        break;
+      case 3: // Product List
+      case 4: // Create Product
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ProductScreen()),
+        );
+        break;
+      case 5: // Category List
+      case 6: // Create Category
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const CategoryScreen()),
+        );
+        break;
+      case 7: // Ad List
+      case 8: // Create Ad
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AdvertiseScreen()),
+        );
+        break;
+      case 9: // Notifications
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const NotificationScreen()),
+        );
+        break;
+      case 10: // Profile
+      case 11: // Edit Profile
+      case 12: // Change Password
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        );
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              context.read<AuthBloc>().add(Logout());
-              Navigator.of(
-                context,
-              ).pushNamedAndRemoveUntil('/login', (route) => false);
-            },
-          ),
-        ],
+      key: _scaffoldKey,
+      appBar: CustomAppBar(
+        title: 'Dashboard',
+        onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        onNotificationPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const NotificationScreen()),
+        ),
+        onProfilePressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        ),
+      ),
+      drawer: CustomDrawer(
+        selectedIndex: 0,
+        onItemTapped: _onDrawerItemTapped,
+        headerTitle: 'CRM App',
+        headerSubtitle: 'Dashboard',
       ),
       body: GridView.count(
         crossAxisCount: 2,
@@ -36,52 +98,42 @@ class DashboardScreen extends StatelessWidget {
           _buildDashboardCard(
             context,
             'Categories',
-            Icons.category,
+            Icons.category_rounded,
             Colors.blue,
-            () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CategoryScreen()),
-              );
-            },
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CategoryScreen()),
+            ),
           ),
           _buildDashboardCard(
             context,
             'Products',
-            Icons.inventory_2,
+            Icons.inventory_2_rounded,
             Colors.green,
-            () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ProductScreen()),
-              );
-            },
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ProductScreen()),
+            ),
           ),
           _buildDashboardCard(
             context,
             'Orders',
-            Icons.shopping_cart,
+            Icons.shopping_cart_rounded,
             Colors.orange,
-            () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const OrderScreen()),
-              );
-            },
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const OrderScreen()),
+            ),
           ),
           _buildDashboardCard(
             context,
             'Advertisements',
-            Icons.campaign,
+            Icons.campaign_rounded,
             Colors.purple,
-            () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AdvertiseScreen(),
-                ),
-              );
-            },
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AdvertiseScreen()),
+            ),
           ),
         ],
       ),
@@ -97,8 +149,10 @@ class DashboardScreen extends StatelessWidget {
   ) {
     return Card(
       elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -106,7 +160,8 @@ class DashboardScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
             ),
           ],
         ),

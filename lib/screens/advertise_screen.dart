@@ -4,8 +4,11 @@ import '../bloc/advertise_bloc.dart';
 import '../events/advertise_events.dart';
 import '../states/advertise_state.dart';
 import '../widgets/advertise_widgets.dart';
-// Import update screen for navigation
+import '../widgets/custom_app_bar.dart';
+import '../widgets/custom_drawer.dart';
 import 'advertise_update_screen.dart';
+import 'notification_screen.dart';
+import 'profile_screen.dart';
 
 // Convert to StatefulWidget to dispatch GetAdvertiseList in initState
 class AdvertiseScreen extends StatefulWidget {
@@ -16,17 +19,67 @@ class AdvertiseScreen extends StatefulWidget {
 }
 
 class _AdvertiseScreenState extends State<AdvertiseScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     super.initState();
-    // Auto-load advertisements when screen opens
     context.read<AdvertiseBloc>().add(GetAdvertiseList());
+  }
+
+  void _onDrawerItemTapped(int index) {
+    Navigator.pushReplacementNamed(context, _indexToRoute(index));
+  }
+
+  String _indexToRoute(int index) {
+    switch (index) {
+      case 0:
+        return '/dashboard';
+      case 1:
+      case 2:
+        return '/orders';
+      case 3:
+      case 4:
+        return '/products';
+      case 5:
+      case 6:
+        return '/categories';
+      case 7:
+      case 8:
+        return '/advertisements';
+      case 9:
+        return '/notifications';
+      case 10:
+      case 11:
+      case 12:
+        return '/profile';
+      default:
+        return '/dashboard';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Advertisements')),
+      key: _scaffoldKey,
+      appBar: CustomAppBar(
+        title: 'Advertisements',
+        onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        onNotificationPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const NotificationScreen()),
+        ),
+        onProfilePressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        ),
+      ),
+      drawer: CustomDrawer(
+        selectedIndex: 7,
+        onItemTapped: _onDrawerItemTapped,
+        headerTitle: 'CRM App',
+        headerSubtitle: 'Advertisements',
+      ),
       body: BlocBuilder<AdvertiseBloc, AdvertiseState>(
         builder: (context, state) {
           if (state.isLoading) {
@@ -174,7 +227,12 @@ class _CreateAdvertiseScreenState extends State<CreateAdvertiseScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Advertisement')),
+      appBar: AppBar(
+        title: const Text('Create Advertisement'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 1,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

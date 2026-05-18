@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/notification_bloc.dart';
 import '../events/notification_events.dart';
 import '../states/notification_state.dart';
+import '../widgets/custom_app_bar.dart';
+import '../widgets/custom_drawer.dart';
+import 'profile_screen.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -14,6 +17,7 @@ class NotificationScreen extends StatefulWidget {
 class _NotificationScreenState extends State<NotificationScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -42,8 +46,15 @@ class _NotificationScreenState extends State<NotificationScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Notifications'),
+      key: _scaffoldKey,
+      appBar: CustomAppBar(
+        title: 'Notifications',
+        onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        onProfilePressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        ),
+        showNotifications: false,
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
@@ -56,16 +67,33 @@ class _NotificationScreenState extends State<NotificationScreen>
             icon: const Icon(Icons.mark_email_read),
             onPressed: () {
               context.read<NotificationBloc>().add(MarkAllNotificationsRead());
-              // Reload unread list after marking all read
               Future.delayed(const Duration(milliseconds: 300), () {
                 if (mounted) {
-                  context.read<NotificationBloc>().add(GetUnreadNotifications());
+                  context
+                      .read<NotificationBloc>()
+                      .add(GetUnreadNotifications());
                 }
               });
             },
             tooltip: 'Mark all as read',
           ),
+          IconButton(
+            icon: const Icon(Icons.account_circle_outlined),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ProfileScreen()),
+            ),
+            tooltip: 'Profile',
+          ),
         ],
+      ),
+      drawer: CustomDrawer(
+        selectedIndex: 9,
+        onItemTapped: (index) {
+          Navigator.pushReplacementNamed(context, _indexToRoute(index));
+        },
+        headerTitle: 'CRM App',
+        headerSubtitle: 'Notifications',
       ),
       body: BlocBuilder<NotificationBloc, NotificationState>(
         builder: (context, state) {
@@ -107,6 +135,33 @@ class _NotificationScreenState extends State<NotificationScreen>
         },
       ),
     );
+  }
+
+  String _indexToRoute(int index) {
+    switch (index) {
+      case 0:
+        return '/dashboard';
+      case 1:
+      case 2:
+        return '/orders';
+      case 3:
+      case 4:
+        return '/products';
+      case 5:
+      case 6:
+        return '/categories';
+      case 7:
+      case 8:
+        return '/advertisements';
+      case 9:
+        return '/notifications';
+      case 10:
+      case 11:
+      case 12:
+        return '/profile';
+      default:
+        return '/dashboard';
+    }
   }
 
   Widget _buildNotificationList(

@@ -24,7 +24,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Order Detail')),
+      appBar: AppBar(
+        title: const Text('Order Detail'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 1,
+      ),
       body: BlocBuilder<OrderBloc, OrderState>(
         builder: (context, state) {
           if (state.isLoading) {

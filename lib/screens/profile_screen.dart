@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/profile_bloc.dart';
 import '../events/profile_events.dart';
 import '../states/profile_state.dart';
+import '../widgets/custom_app_bar.dart';
+import '../widgets/custom_drawer.dart';
+import 'notification_screen.dart';
 
 // Convert to StatefulWidget to auto-load profile in initState
 class ProfileScreen extends StatefulWidget {
@@ -13,6 +16,8 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     super.initState();
@@ -20,10 +25,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
     context.read<ProfileBloc>().add(GetProfileDetails());
   }
 
+  void _onDrawerItemTapped(int index) {
+    Navigator.pushReplacementNamed(context, _indexToRoute(index));
+  }
+
+  String _indexToRoute(int index) {
+    switch (index) {
+      case 0:
+        return '/dashboard';
+      case 1:
+      case 2:
+        return '/orders';
+      case 3:
+      case 4:
+        return '/products';
+      case 5:
+      case 6:
+        return '/categories';
+      case 7:
+      case 8:
+        return '/advertisements';
+      case 9:
+        return '/notifications';
+      case 10:
+      case 11:
+      case 12:
+        return '/profile';
+      default:
+        return '/dashboard';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      key: _scaffoldKey,
+      appBar: CustomAppBar(
+        title: 'Profile',
+        onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        onNotificationPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const NotificationScreen()),
+        ),
+        showProfile: false,
+      ),
+      drawer: CustomDrawer(
+        selectedIndex: 10,
+        onItemTapped: _onDrawerItemTapped,
+        headerTitle: 'CRM App',
+        headerSubtitle: 'Profile',
+      ),
       body: BlocBuilder<ProfileBloc, ProfileState>(
         builder: (context, state) {
           if (state.isLoading) {
@@ -150,7 +201,12 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Update Profile')),
+      appBar: AppBar(
+        title: const Text('Update Profile'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 1,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -229,7 +285,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Reset Password')),
+      appBar: AppBar(
+        title: const Text('Reset Password'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 1,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

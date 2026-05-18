@@ -4,8 +4,11 @@ import '../bloc/product_bloc.dart';
 import '../events/product_events.dart';
 import '../states/product_state.dart';
 import '../widgets/product_widgets.dart';
-// Import view screen for navigation
+import '../widgets/custom_app_bar.dart';
+import '../widgets/custom_drawer.dart';
 import 'product_view_screen.dart';
+import 'notification_screen.dart';
+import 'profile_screen.dart';
 
 // Convert to StatefulWidget to dispatch GetProductList in initState
 class ProductScreen extends StatefulWidget {
@@ -16,17 +19,67 @@ class ProductScreen extends StatefulWidget {
 }
 
 class _ProductScreenState extends State<ProductScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     super.initState();
-    // Auto-load products when screen opens
     context.read<ProductBloc>().add(GetProductList());
+  }
+
+  void _onDrawerItemTapped(int index) {
+    Navigator.pushReplacementNamed(context, _indexToRoute(index));
+  }
+
+  String _indexToRoute(int index) {
+    switch (index) {
+      case 0:
+        return '/dashboard';
+      case 1:
+      case 2:
+        return '/orders';
+      case 3:
+      case 4:
+        return '/products';
+      case 5:
+      case 6:
+        return '/categories';
+      case 7:
+      case 8:
+        return '/advertisements';
+      case 9:
+        return '/notifications';
+      case 10:
+      case 11:
+      case 12:
+        return '/profile';
+      default:
+        return '/dashboard';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Products')),
+      key: _scaffoldKey,
+      appBar: CustomAppBar(
+        title: 'Products',
+        onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        onNotificationPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const NotificationScreen()),
+        ),
+        onProfilePressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        ),
+      ),
+      drawer: CustomDrawer(
+        selectedIndex: 3,
+        onItemTapped: _onDrawerItemTapped,
+        headerTitle: 'CRM App',
+        headerSubtitle: 'Products',
+      ),
       body: BlocBuilder<ProductBloc, ProductState>(
         builder: (context, state) {
           if (state.isLoading) {
@@ -165,7 +218,12 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Product')),
+      appBar: AppBar(
+        title: const Text('Create Product'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 1,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

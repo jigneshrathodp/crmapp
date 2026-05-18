@@ -4,7 +4,11 @@ import '../bloc/category_bloc.dart';
 import '../events/category_events.dart';
 import '../states/category_state.dart';
 import '../widgets/category_widgets.dart';
+import '../widgets/custom_app_bar.dart';
+import '../widgets/custom_drawer.dart';
 import 'category_view_screen.dart';
+import 'notification_screen.dart';
+import 'profile_screen.dart';
 
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen({super.key});
@@ -13,18 +17,69 @@ class CategoryScreen extends StatefulWidget {
   State<CategoryScreen> createState() => _CategoryScreenState();
 }
 
+
 class _CategoryScreenState extends State<CategoryScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     super.initState();
-    // Auto-load categories when screen opens
     context.read<CategoryBloc>().add(GetCategoryList());
+  }
+
+  void _onDrawerItemTapped(int index) {
+    Navigator.pushReplacementNamed(context, _indexToRoute(index));
+  }
+
+  String _indexToRoute(int index) {
+    switch (index) {
+      case 0:
+        return '/dashboard';
+      case 1:
+      case 2:
+        return '/orders';
+      case 3:
+      case 4:
+        return '/products';
+      case 5:
+      case 6:
+        return '/categories';
+      case 7:
+      case 8:
+        return '/advertisements';
+      case 9:
+        return '/notifications';
+      case 10:
+      case 11:
+      case 12:
+        return '/profile';
+      default:
+        return '/dashboard';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Categories')),
+      key: _scaffoldKey,
+      appBar: CustomAppBar(
+        title: 'Categories',
+        onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        onNotificationPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const NotificationScreen()),
+        ),
+        onProfilePressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        ),
+      ),
+      drawer: CustomDrawer(
+        selectedIndex: 5,
+        onItemTapped: _onDrawerItemTapped,
+        headerTitle: 'CRM App',
+        headerSubtitle: 'Categories',
+      ),
       body: BlocBuilder<CategoryBloc, CategoryState>(
         builder: (context, state) {
           if (state.isLoading) {
@@ -138,7 +193,12 @@ class _CreateCategoryScreenState extends State<CreateCategoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Category')),
+      appBar: AppBar(
+        title: const Text('Create Category'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 1,
+      ),
       body: BlocListener<CategoryBloc, CategoryState>(
         listener: (context, state) {
           if (!state.isLoading && state.error == null && state.createdCategory != null) {

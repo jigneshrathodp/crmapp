@@ -97,7 +97,12 @@ class _AdvertiseUpdateScreenState extends State<AdvertiseUpdateScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Update Advertisement')),
+      appBar: AppBar(
+        title: const Text('Update Advertisement'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 1,
+      ),
       body: BlocListener<AdvertiseBloc, AdvertiseState>(
         listener: (context, state) {
           if (state.updatedAdvertise != null) {

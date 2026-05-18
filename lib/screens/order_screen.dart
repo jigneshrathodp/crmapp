@@ -4,8 +4,11 @@ import '../bloc/order_bloc.dart';
 import '../events/order_events.dart';
 import '../states/order_state.dart';
 import '../widgets/order_widgets.dart';
-// Import detail screen for navigation
+import '../widgets/custom_app_bar.dart';
+import '../widgets/custom_drawer.dart';
 import 'order_detail_screen.dart';
+import 'notification_screen.dart';
+import 'profile_screen.dart';
 
 // Convert to StatefulWidget to dispatch GetOrderList in initState
 class OrderScreen extends StatefulWidget {
@@ -16,17 +19,67 @@ class OrderScreen extends StatefulWidget {
 }
 
 class _OrderScreenState extends State<OrderScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     super.initState();
-    // Auto-load orders when screen opens
     context.read<OrderBloc>().add(GetOrderList());
+  }
+
+  void _onDrawerItemTapped(int index) {
+    Navigator.pushReplacementNamed(context, _indexToRoute(index));
+  }
+
+  String _indexToRoute(int index) {
+    switch (index) {
+      case 0:
+        return '/dashboard';
+      case 1:
+      case 2:
+        return '/orders';
+      case 3:
+      case 4:
+        return '/products';
+      case 5:
+      case 6:
+        return '/categories';
+      case 7:
+      case 8:
+        return '/advertisements';
+      case 9:
+        return '/notifications';
+      case 10:
+      case 11:
+      case 12:
+        return '/profile';
+      default:
+        return '/dashboard';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Orders')),
+      key: _scaffoldKey,
+      appBar: CustomAppBar(
+        title: 'Orders',
+        onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        onNotificationPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const NotificationScreen()),
+        ),
+        onProfilePressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        ),
+      ),
+      drawer: CustomDrawer(
+        selectedIndex: 2,
+        onItemTapped: _onDrawerItemTapped,
+        headerTitle: 'CRM App',
+        headerSubtitle: 'Orders',
+      ),
       body: BlocBuilder<OrderBloc, OrderState>(
         builder: (context, state) {
           if (state.isLoading) {
@@ -153,7 +206,12 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Order')),
+      appBar: AppBar(
+        title: const Text('Create Order'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 1,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
