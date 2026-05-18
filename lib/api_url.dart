@@ -1,0 +1,33 @@
+class ApiUrls {
+  ApiUrls._();
+  static const String baseUrl = "https://crmrize.govindcrankrod.com/api";
+  static const String login = "$baseUrl/login";
+  static const String logout = "$baseUrl/logout";
+  static const String updateProfile = "$baseUrl/profile/update";
+  static const String profileDetails = "$baseUrl/profile";
+  static const String resetPassword = "$baseUrl/change-password";
+  static const String dashboard = "$baseUrl/dashboard";
+  static const String categoryList = "$baseUrl/categories";
+  static const String categoryCreate = "$baseUrl/categories/create";
+  static String categoryView(int id) => "$baseUrl/categories/$id";
+  static String categoryUpdate(int id) => "$baseUrl/categories/$id";
+  static String categoryDelete(int id) => "$baseUrl/categories/$id";
+  static const String productList = "$baseUrl/products";
+  static const String productCreate = "$baseUrl/products/create";
+  static String productView(int id) => "$baseUrl/products/$id";
+  static String productUpdate(int id) => "$baseUrl/products/$id";
+  static String productDelete(int id) => "$baseUrl/products/$id";
+  static const String orderList = "$baseUrl/orders";
+  static const String orderCreate = "$baseUrl/orders/create";
+  static String orderDetail(int id) => "$baseUrl/orders/$id";
+  static String orderDelete(int id) => "$baseUrl/orders/$id";
+  static const String advertiseList = "$baseUrl/advertises";
+  static const String advertiseCreate = "$baseUrl/advertises/create";
+  static String advertiseUpdate(int id) => "$baseUrl/advertises/$id";
+  static String advertiseDelete(int id) => "$baseUrl/advertises/$id";
+  static const String unreadNotifications = "$baseUrl/notifications/unread";
+  static const String readNotifications = "$baseUrl/notifications/read";
+  static String markNotificationRead(int id) => "$baseUrl/notifications/$id/mark-read";
+  static const String markAllNotificationsRead = "$baseUrl/notifications/mark-all-read";
+  static String notificationDelete(int id) => "$baseUrl/notifications/$id";
+}
