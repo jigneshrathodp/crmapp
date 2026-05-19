@@ -112,7 +112,7 @@ class _ProfileScreenState extends State<ProfileScreen> with DrawerNavigationMixi
                                 width: 56,
                                 height: 56,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const Icon(Icons.person_rounded, color: Colors.white, size: 30),
+                                errorBuilder: (context, error, stackTrace) => const Icon(Icons.person_rounded, color: Colors.white, size: 30),
                               ),
                             )
                           : const Icon(Icons.person_rounded, color: Colors.white, size: 30),

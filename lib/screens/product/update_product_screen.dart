@@ -6,6 +6,9 @@ import 'package:http/http.dart' as http;
 import '../../bloc/product_bloc.dart';
 import '../../events/product_events.dart';
 import '../../states/product_state.dart';
+import '../../bloc/category_bloc.dart';
+import '../../events/category_events.dart';
+import '../../states/category_state.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_drawer.dart';
 import '../notification_screen.dart';
@@ -58,6 +61,7 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> with DrawerNa
   late bool _isActive;
   late bool _forSale;
   File? _newImage;
+  String? _selectedCategoryId;
   final _picker = ImagePicker();
 
   static const _border = OutlineInputBorder(
@@ -80,6 +84,8 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> with DrawerNa
   @override
   void initState() {
     super.initState();
+    context.read<CategoryBloc>().add(GetCategoryList());
+    _selectedCategoryId = widget.categoryId != null && widget.categoryId!.isNotEmpty ? widget.categoryId : null;
     _nameController = TextEditingController(text: widget.productName ?? '');
     _categoryController = TextEditingController(text: widget.categoryId ?? '');
     _qntyController = TextEditingController(text: widget.quantity ?? '');
@@ -115,7 +121,7 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> with DrawerNa
     if (!mounted) return;
     final fields = <String, String>{
       'name': _nameController.text,
-      'category': _categoryController.text,
+      'category': _selectedCategoryId ?? '',
       'qnty': _qntyController.text,
       'weight_in_gram': _weightInGramController.text,
       'cost_per_gram': _costPerGramController.text,
@@ -185,7 +191,7 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> with DrawerNa
                           ? Image.file(_newImage!, fit: BoxFit.cover)
                           : (widget.image != null && widget.image!.isNotEmpty
                               ? Image.network(widget.image!, fit: BoxFit.cover,
-                                  errorBuilder: (_, _, _) =>
+                                  errorBuilder: (context, error, stackTrace) =>
                                       const Icon(Icons.image, size: 60, color: Colors.black26))
                               : const Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -204,9 +210,38 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> with DrawerNa
                 TextFormField(controller: _nameController, decoration: _dec('Name'),
                     validator: (v) => v?.isEmpty ?? true ? 'Name is required' : null),
                 const SizedBox(height: 12),
-                TextFormField(controller: _categoryController, decoration: _dec('Category ID'),
-                    keyboardType: TextInputType.number,
-                    validator: (v) => v?.isEmpty ?? true ? 'Category ID is required' : null),
+                BlocBuilder<CategoryBloc, CategoryState>(
+                  builder: (context, state) {
+                    if (state.isLoading) {
+                      return const Center(child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator(),
+                      ));
+                    }
+                    final categories = state.categoryList?.data ?? [];
+                    String? dropdownValue = _selectedCategoryId;
+                    if (dropdownValue != null && !categories.any((cat) => cat.id?.toString() == dropdownValue)) {
+                      dropdownValue = null;
+                    }
+                    return DropdownButtonFormField<String>(
+                      decoration: _dec('Category'),
+                      value: dropdownValue,
+                      items: categories.map((cat) {
+                        return DropdownMenuItem<String>(
+                          value: cat.id?.toString(),
+                          child: Text(cat.name ?? ''),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedCategoryId = value;
+                          _categoryController.text = value ?? '';
+                        });
+                      },
+                      validator: (v) => v == null || v.isEmpty ? 'Category is required' : null,
+                    );
+                  },
+                ),
                 const SizedBox(height: 12),
                 TextFormField(controller: _qntyController, decoration: _dec('Quantity'),
                     keyboardType: TextInputType.number,

@@ -2,6 +2,8 @@ import 'package:equatable/equatable.dart';
 import '../models/Order_model/get_order_model.dart';
 import '../models/Order_model/create_order_model.dart';
 import '../models/Order_model/delete_order_model.dart';
+// FIX: order detail API returns single object — use ViewOrderModel
+import '../models/Order_model/view_order_model.dart';
 
 // Sentinel to distinguish "not provided" from explicit null in copyWith.
 const Object _sentinel = Object();
@@ -9,7 +11,8 @@ const Object _sentinel = Object();
 class OrderState extends Equatable {
   final bool isLoading;
   final GetOrderModel? orderList;
-  final GetOrderModel? orderDetail;
+  // FIX: was GetOrderModel (list model) — now correctly ViewOrderModel (single object)
+  final ViewOrderModel? orderDetail;
   final CreateOrderModel? createdOrder;
   final DeleteOrderModel? deletedOrder;
   final String? error;
@@ -26,7 +29,7 @@ class OrderState extends Equatable {
   OrderState copyWith({
     bool? isLoading,
     GetOrderModel? orderList,
-    GetOrderModel? orderDetail,
+    ViewOrderModel? orderDetail,
     CreateOrderModel? createdOrder,
     DeleteOrderModel? deletedOrder,
     Object? error = _sentinel,

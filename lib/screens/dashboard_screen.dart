@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../events/dashboard_events.dart';
 import '../states/dashboard_state.dart';
+import '../bloc/profile_bloc.dart';
+import '../events/profile_events.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_drawer.dart';
 import '../utils/navigation_mixin.dart';
@@ -24,6 +26,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   void initState() {
     super.initState();
     context.read<DashboardBloc>().add(GetDashboard());
+    context.read<ProfileBloc>().add(GetProfileDetails());
   }
 
   @override
@@ -49,6 +52,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         headerTitle: 'CRM App',
         headerSubtitle: 'Dashboard',
       ),
+
       body: BlocBuilder<DashboardBloc, DashboardState>(
         builder: (context, state) {
           if (state.isLoading) {
@@ -62,7 +66,11 @@ class _DashboardScreenState extends State<DashboardScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.black54),
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Colors.black54,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'Error: ${state.error}',
@@ -74,8 +82,13 @@ class _DashboardScreenState extends State<DashboardScreen>
                     onPressed: () =>
                         context.read<DashboardBloc>().add(GetDashboard()),
                     icon: const Icon(Icons.refresh, color: Colors.white),
-                    label: const Text('Retry', style: TextStyle(color: Colors.white)),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.black87),
+                    label: const Text(
+                      'Retry',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black87,
+                    ),
                   ),
                 ],
               ),
@@ -97,22 +110,7 @@ class _DashboardScreenState extends State<DashboardScreen>
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ── Header ────────────────────────────────────────
-                  const Text(
-                    'DASHBOARD',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.black87,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // ── Stats Grid ────────────────────────────────────
-                  _buildStatsGrid(data),
-                ],
+                children: [_buildStatsGrid(data)],
               ),
             ),
           );
@@ -131,75 +129,93 @@ class _DashboardScreenState extends State<DashboardScreen>
     final List<_StatItem> stats = [];
 
     if (statsMap.containsKey('total_categories')) {
-      stats.add(_StatItem(
-        label: 'Total Categories',
-        value: '${statsMap['total_categories'] ?? 0}',
-        icon: Icons.format_list_bulleted_rounded,
-      ));
+      stats.add(
+        _StatItem(
+          label: 'Total Categories',
+          value: '${statsMap['total_categories'] ?? 0}',
+          icon: Icons.format_list_bulleted_rounded,
+        ),
+      );
     }
 
     if (statsMap.containsKey('total_products')) {
-      stats.add(_StatItem(
-        label: 'Total Products',
-        value: '${statsMap['total_products'] ?? 0}',
-        icon: Icons.inventory_2_rounded,
-      ));
+      stats.add(
+        _StatItem(
+          label: 'Total Products',
+          value: '${statsMap['total_products'] ?? 0}',
+          icon: Icons.inventory_2_rounded,
+        ),
+      );
     }
 
     if (statsMap.containsKey('total_sold_products')) {
-      stats.add(_StatItem(
-        label: 'Sold Products',
-        value: '${statsMap['total_sold_products'] ?? 0}',
-        icon: Icons.local_offer_rounded,
-      ));
+      stats.add(
+        _StatItem(
+          label: 'Sold Products',
+          value: '${statsMap['total_sold_products'] ?? 0}',
+          icon: Icons.local_offer_rounded,
+        ),
+      );
     }
 
     if (statsMap.containsKey('total_orders')) {
-      stats.add(_StatItem(
-        label: 'Total Orders',
-        value: '${statsMap['total_orders'] ?? 0}',
-        icon: Icons.receipt_long_rounded,
-      ));
+      stats.add(
+        _StatItem(
+          label: 'Total Orders',
+          value: '${statsMap['total_orders'] ?? 0}',
+          icon: Icons.receipt_long_rounded,
+        ),
+      );
     }
 
     if (statsMap.containsKey('current_month_orders')) {
-      stats.add(_StatItem(
-        label: 'Current Month Orders',
-        value: '${statsMap['current_month_orders'] ?? 0}',
-        icon: Icons.calendar_month_rounded,
-      ));
+      stats.add(
+        _StatItem(
+          label: 'Current Month Orders',
+          value: '${statsMap['current_month_orders'] ?? 0}',
+          icon: Icons.calendar_month_rounded,
+        ),
+      );
     }
 
     if (statsMap.containsKey('total_product_cost')) {
-      stats.add(_StatItem(
-        label: 'Total Product Cost',
-        value: '₹${statsMap['total_product_cost'] ?? 0}',
-        icon: Icons.shopping_bag_rounded,
-      ));
+      stats.add(
+        _StatItem(
+          label: 'Total Product Cost',
+          value: '₹${statsMap['total_product_cost'] ?? 0}',
+          icon: Icons.shopping_bag_rounded,
+        ),
+      );
     }
 
     if (statsMap.containsKey('total_sold_price')) {
-      stats.add(_StatItem(
-        label: 'Total Sold Price',
-        value: '₹${statsMap['total_sold_price'] ?? 0}',
-        icon: Icons.attach_money_rounded,
-      ));
+      stats.add(
+        _StatItem(
+          label: 'Total Sold Price',
+          value: '₹${statsMap['total_sold_price'] ?? 0}',
+          icon: Icons.attach_money_rounded,
+        ),
+      );
     }
 
     if (statsMap.containsKey('total_advertisements')) {
-      stats.add(_StatItem(
-        label: 'Total Advertisements',
-        value: '${statsMap['total_advertisements'] ?? 0}',
-        icon: Icons.ad_units_rounded,
-      ));
+      stats.add(
+        _StatItem(
+          label: 'Total Advertisements',
+          value: '${statsMap['total_advertisements'] ?? 0}',
+          icon: Icons.ad_units_rounded,
+        ),
+      );
     }
 
     if (statsMap.containsKey('total_advertise_price')) {
-      stats.add(_StatItem(
-        label: 'Total Advertise Price',
-        value: '₹${statsMap['total_advertise_price'] ?? 0}',
-        icon: Icons.receipt_rounded,
-      ));
+      stats.add(
+        _StatItem(
+          label: 'Total Advertise Price',
+          value: '₹${statsMap['total_advertise_price'] ?? 0}',
+          icon: Icons.receipt_rounded,
+        ),
+      );
     }
 
     // Fallback: show raw data if no known keys matched
@@ -208,11 +224,13 @@ class _DashboardScreenState extends State<DashboardScreen>
         spacing: 12,
         runSpacing: 12,
         children: statsMap.entries.map((e) {
-          return _buildStatCard(_StatItem(
-            label: e.key.replaceAll('_', ' ').toUpperCase(),
-            value: '${e.value ?? 'N/A'}',
-            icon: Icons.bar_chart_rounded,
-          ));
+          return _buildStatCard(
+            _StatItem(
+              label: e.key.replaceAll('_', ' ').toUpperCase(),
+              value: '${e.value ?? 'N/A'}',
+              icon: Icons.bar_chart_rounded,
+            ),
+          );
         }).toList(),
       );
     }

@@ -6,13 +6,16 @@ import '../models/Category_model/get_catgory_model.dart';
 import '../models/Category_model/create_category_model.dart';
 import '../models/Category_model/update_category_model.dart';
 import '../models/Category_model/delete_category_model.dart';
+import '../models/Category_model/view_category_model.dart';
 import '../models/product_model/get_product_model.dart';
 import '../models/product_model/create_product_model.dart';
 import '../models/product_model/update_product_model.dart';
 import '../models/product_model/delete_product_model.dart';
+import '../models/product_model/view_product_model.dart';
 import '../models/Order_model/get_order_model.dart';
 import '../models/Order_model/create_order_model.dart';
 import '../models/Order_model/delete_order_model.dart';
+import '../models/Order_model/view_order_model.dart';
 import '../models/Advertise_model/get_advertise_model.dart';
 import '../models/Advertise_model/create_advertise_model.dart';
 import '../models/Advertise_model/update_advertise_model.dart';
@@ -22,32 +25,22 @@ class AllApiCalls {
   final BaseApi _baseApi;
 
   AllApiCalls(this._baseApi);
-
-  // Helper to strip base URL prefix from full URL
-  String _path(String fullUrl) =>
-      fullUrl.replaceFirst(ApiUrls.baseUrl, '');
+  String _path(String fullUrl) => fullUrl.replaceFirst(ApiUrls.baseUrl, '');
 
   // Auth APIs
   Future<Map<String, dynamic>> login(Map<String, dynamic> data) async {
-    final response = await _baseApi.post(
-      _path(ApiUrls.login),
-      body: data,
-    );
+    final response = await _baseApi.post(_path(ApiUrls.login), body: data);
     return jsonDecode(response.body);
   }
 
   Future<Map<String, dynamic>> logout() async {
-    final response = await _baseApi.post(
-      _path(ApiUrls.logout),
-    );
+    final response = await _baseApi.post(_path(ApiUrls.logout));
     return jsonDecode(response.body);
   }
 
   // Profile APIs
   Future<Map<String, dynamic>> getProfileDetails() async {
-    final response = await _baseApi.get(
-      _path(ApiUrls.profileDetails),
-    );
+    final response = await _baseApi.get(_path(ApiUrls.profileDetails));
     return jsonDecode(response.body);
   }
 
@@ -58,7 +51,15 @@ class AllApiCalls {
     Map<String, String> textFields, {
     Map<String, http.MultipartFile>? imageFiles,
   }) async {
-    final files = imageFiles?.values.toList();
+    final files = imageFiles?.entries
+        .map((e) => http.MultipartFile(
+              e.key,
+              e.value.finalize(),
+              e.value.length,
+              filename: e.value.filename,
+              contentType: e.value.contentType,
+            ))
+        .toList();
     final response = await _baseApi.postMultipart(
       _path(ApiUrls.updateProfile),
       fields: textFields,
@@ -77,17 +78,13 @@ class AllApiCalls {
 
   // Dashboard API
   Future<Map<String, dynamic>> getDashboard() async {
-    final response = await _baseApi.get(
-      _path(ApiUrls.dashboard),
-    );
+    final response = await _baseApi.get(_path(ApiUrls.dashboard));
     return jsonDecode(response.body);
   }
 
   // Category APIs
   Future<GetCatgoryModel> getCategoryList() async {
-    final response = await _baseApi.get(
-      _path(ApiUrls.categoryList),
-    );
+    final response = await _baseApi.get(_path(ApiUrls.categoryList));
     return GetCatgoryModel.fromJson(jsonDecode(response.body));
   }
 
@@ -104,11 +101,10 @@ class AllApiCalls {
     return CreateCategoryModel.fromJson(jsonDecode(response.body));
   }
 
-  Future<GetCatgoryModel> viewCategory(int id) async {
-    final response = await _baseApi.get(
-      _path(ApiUrls.categoryView(id)),
-    );
-    return GetCatgoryModel.fromJson(jsonDecode(response.body));
+  /// FIX: API GET /categories/{id} returns single object — use ViewCategoryModel, not GetCatgoryModel.
+  Future<ViewCategoryModel> viewCategory(int id) async {
+    final response = await _baseApi.get(_path(ApiUrls.categoryView(id)));
+    return ViewCategoryModel.fromJson(jsonDecode(response.body));
   }
 
   /// Update category with multipart + _method=PUT (Laravel method spoofing).
@@ -129,17 +125,13 @@ class AllApiCalls {
   }
 
   Future<DeleteCategoryModel> deleteCategory(int id) async {
-    final response = await _baseApi.delete(
-      _path(ApiUrls.categoryDelete(id)),
-    );
+    final response = await _baseApi.delete(_path(ApiUrls.categoryDelete(id)));
     return DeleteCategoryModel.fromJson(jsonDecode(response.body));
   }
 
   // Product APIs
   Future<GetproductModel> getProductList() async {
-    final response = await _baseApi.get(
-      _path(ApiUrls.productList),
-    );
+    final response = await _baseApi.get(_path(ApiUrls.productList));
     return GetproductModel.fromJson(jsonDecode(response.body));
   }
 
@@ -157,11 +149,10 @@ class AllApiCalls {
     return CreateProductModel.fromJson(jsonDecode(response.body));
   }
 
-  Future<GetproductModel> viewProduct(int id) async {
-    final response = await _baseApi.get(
-      _path(ApiUrls.productView(id)),
-    );
-    return GetproductModel.fromJson(jsonDecode(response.body));
+  /// FIX: API GET /products/{id} returns single object — use ViewProductModel, not GetproductModel.
+  Future<ViewProductModel> viewProduct(int id) async {
+    final response = await _baseApi.get(_path(ApiUrls.productView(id)));
+    return ViewProductModel.fromJson(jsonDecode(response.body));
   }
 
   /// Update product with multipart + _method=PUT (Laravel method spoofing).
@@ -181,17 +172,13 @@ class AllApiCalls {
   }
 
   Future<DeleteProductModel> deleteProduct(int id) async {
-    final response = await _baseApi.delete(
-      _path(ApiUrls.productDelete(id)),
-    );
+    final response = await _baseApi.delete(_path(ApiUrls.productDelete(id)));
     return DeleteProductModel.fromJson(jsonDecode(response.body));
   }
 
   // Order APIs
   Future<GetOrderModel> getOrderList() async {
-    final response = await _baseApi.get(
-      _path(ApiUrls.orderList),
-    );
+    final response = await _baseApi.get(_path(ApiUrls.orderList));
     return GetOrderModel.fromJson(jsonDecode(response.body));
   }
 
@@ -203,29 +190,26 @@ class AllApiCalls {
     return CreateOrderModel.fromJson(jsonDecode(response.body));
   }
 
-  Future<GetOrderModel> getOrderDetail(int id) async {
-    final response = await _baseApi.get(
-      _path(ApiUrls.orderDetail(id)),
-    );
-    return GetOrderModel.fromJson(jsonDecode(response.body));
+  /// FIX: API GET /orders/{id} returns single object — use ViewOrderModel, not GetOrderModel.
+  Future<ViewOrderModel> getOrderDetail(int id) async {
+    final response = await _baseApi.get(_path(ApiUrls.orderDetail(id)));
+    return ViewOrderModel.fromJson(jsonDecode(response.body));
   }
 
   Future<DeleteOrderModel> deleteOrder(int id) async {
-    final response = await _baseApi.delete(
-      _path(ApiUrls.orderDelete(id)),
-    );
+    final response = await _baseApi.delete(_path(ApiUrls.orderDelete(id)));
     return DeleteOrderModel.fromJson(jsonDecode(response.body));
   }
 
   // Advertise APIs
   Future<GetAdvertiseModel> getAdvertiseList() async {
-    final response = await _baseApi.get(
-      _path(ApiUrls.advertiseList),
-    );
+    final response = await _baseApi.get(_path(ApiUrls.advertiseList));
     return GetAdvertiseModel.fromJson(jsonDecode(response.body));
   }
 
-  Future<CreateAdvertiseModel> createAdvertise(Map<String, dynamic> data) async {
+  Future<CreateAdvertiseModel> createAdvertise(
+    Map<String, dynamic> data,
+  ) async {
     final response = await _baseApi.post(
       _path(ApiUrls.advertiseCreate),
       body: data,
@@ -233,7 +217,10 @@ class AllApiCalls {
     return CreateAdvertiseModel.fromJson(jsonDecode(response.body));
   }
 
-  Future<UpdateAdvertiseModel> updateAdvertise(int id, Map<String, dynamic> data) async {
+  Future<UpdateAdvertiseModel> updateAdvertise(
+    int id,
+    Map<String, dynamic> data,
+  ) async {
     final response = await _baseApi.put(
       _path(ApiUrls.advertiseUpdate(id)),
       body: data,
@@ -242,24 +229,18 @@ class AllApiCalls {
   }
 
   Future<DeleteAdvertiseModel> deleteAdvertise(int id) async {
-    final response = await _baseApi.delete(
-      _path(ApiUrls.advertiseDelete(id)),
-    );
+    final response = await _baseApi.delete(_path(ApiUrls.advertiseDelete(id)));
     return DeleteAdvertiseModel.fromJson(jsonDecode(response.body));
   }
 
   // Notification APIs
   Future<Map<String, dynamic>> getUnreadNotifications() async {
-    final response = await _baseApi.get(
-      _path(ApiUrls.unreadNotifications),
-    );
+    final response = await _baseApi.get(_path(ApiUrls.unreadNotifications));
     return jsonDecode(response.body);
   }
 
   Future<Map<String, dynamic>> getReadNotifications() async {
-    final response = await _baseApi.get(
-      _path(ApiUrls.readNotifications),
-    );
+    final response = await _baseApi.get(_path(ApiUrls.readNotifications));
     return jsonDecode(response.body);
   }
 

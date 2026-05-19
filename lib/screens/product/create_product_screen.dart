@@ -6,6 +6,9 @@ import 'package:http/http.dart' as http;
 import '../../bloc/product_bloc.dart';
 import '../../events/product_events.dart';
 import '../../states/product_state.dart';
+import '../../bloc/category_bloc.dart';
+import '../../events/category_events.dart';
+import '../../states/category_state.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_drawer.dart';
 import '../notification_screen.dart';
@@ -31,7 +34,14 @@ class _CreateProductScreenState extends State<CreateProductScreen> with DrawerNa
   bool _isActive = true;
   bool _forSale = true;
   File? _selectedImage;
+  String? _selectedCategoryId;
   final _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<CategoryBloc>().add(GetCategoryList());
+  }
 
   static const _border = OutlineInputBorder(
     borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -78,7 +88,7 @@ class _CreateProductScreenState extends State<CreateProductScreen> with DrawerNa
     if (!mounted) return;
     final fields = <String, String>{
       'name': _nameController.text,
-      'category': _categoryController.text,
+      'category': _selectedCategoryId ?? '',
       'qnty': _qntyController.text,
       'weight_in_gram': _weightInGramController.text,
       'cost_per_gram': _costPerGramController.text,
@@ -161,9 +171,34 @@ class _CreateProductScreenState extends State<CreateProductScreen> with DrawerNa
                 TextFormField(controller: _nameController, decoration: _dec('Name'),
                     validator: (v) => v?.isEmpty ?? true ? 'Name is required' : null),
                 const SizedBox(height: 12),
-                TextFormField(controller: _categoryController, decoration: _dec('Category ID'),
-                    keyboardType: TextInputType.number,
-                    validator: (v) => v?.isEmpty ?? true ? 'Category ID is required' : null),
+                BlocBuilder<CategoryBloc, CategoryState>(
+                  builder: (context, state) {
+                    if (state.isLoading) {
+                      return const Center(child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator(),
+                      ));
+                    }
+                    final categories = state.categoryList?.data ?? [];
+                    return DropdownButtonFormField<String>(
+                      decoration: _dec('Category'),
+                      value: _selectedCategoryId,
+                      items: categories.map((cat) {
+                        return DropdownMenuItem<String>(
+                          value: cat.id?.toString(),
+                          child: Text(cat.name ?? ''),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedCategoryId = value;
+                          _categoryController.text = value ?? '';
+                        });
+                      },
+                      validator: (v) => v == null || v.isEmpty ? 'Category is required' : null,
+                    );
+                  },
+                ),
                 const SizedBox(height: 12),
                 TextFormField(controller: _qntyController, decoration: _dec('Quantity'),
                     keyboardType: TextInputType.number,

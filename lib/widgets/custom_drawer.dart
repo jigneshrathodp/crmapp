@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../events/auth_events.dart';
 import '../screens/login_screen.dart';
+import '../bloc/profile_bloc.dart';
+import '../states/profile_state.dart';
 
 class CustomDrawer extends StatefulWidget {
   final int selectedIndex;
@@ -259,36 +261,53 @@ class _CustomDrawerState extends State<CustomDrawer> {
           bottom: BorderSide(color: Colors.white.withValues(alpha: 0.1), width: 1),
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Icon(Icons.store_rounded, color: Colors.white, size: 30),
-          ),
-          const SizedBox(height: 14),
-          if (widget.headerTitle != null)
-            Text(
-              widget.headerTitle!,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 17,
+      child: BlocBuilder<ProfileBloc, ProfileState>(
+        builder: (context, state) {
+          final profileDetails = state.profileDetails;
+          final details = profileDetails?['details'];
+          final logoLight = details?['logo_light'] as String?;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: logoLight != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Image.network(
+                          logoLight,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => const Icon(Icons.store_rounded, color: Colors.white, size: 30),
+                        ),
+                      )
+                    : const Icon(Icons.store_rounded, color: Colors.white, size: 30),
               ),
-            ),
-          if (widget.headerSubtitle != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              widget.headerSubtitle!,
-              style: TextStyle(color: Colors.grey.shade400, fontSize: 13),
-            ),
-          ],
-        ],
+              const SizedBox(height: 14),
+              if (widget.headerTitle != null)
+                Text(
+                  widget.headerTitle!,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                  ),
+                ),
+              if (widget.headerSubtitle != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  widget.headerSubtitle!,
+                  style: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+                ),
+              ],
+            ],
+          );
+        },
       ),
     );
   }

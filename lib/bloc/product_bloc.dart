@@ -69,6 +69,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     try {
       final deleted = await _apiCalls.deleteProduct(event.id);
       emit(state.copyWith(isLoading: false, deletedProduct: deleted));
+      add(GetProductList());
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: e.toString()));
     }
@@ -81,7 +82,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     emit(state.copyWith(isLoading: true, error: null));
     try {
       final product = await _apiCalls.viewProduct(event.id);
-      emit(state.copyWith(isLoading: false, productList: product));
+      // FIX: was emitting productList (wrong type) — now emits viewedProduct
+      emit(state.copyWith(isLoading: false, viewedProduct: product));
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: e.toString()));
     }

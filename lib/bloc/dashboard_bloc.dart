@@ -18,8 +18,6 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     emit(state.copyWith(isLoading: true, error: null));
     try {
       final raw = await _apiCalls.getDashboard();
-      // API: { status, message, data: { stats: {...}, profile: {...}, ... } }
-      // Store the inner 'data' object so screens can access data['stats'] etc.
       final dashboard = raw['data'] is Map
           ? Map<String, dynamic>.from(raw['data'] as Map)
           : raw;

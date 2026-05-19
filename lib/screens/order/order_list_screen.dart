@@ -10,7 +10,6 @@ import '../notification_screen.dart';
 import '../profile/profile_screen.dart';
 import '../../utils/navigation_mixin.dart';
 import 'order_detail_screen.dart';
-import 'create_order_screen.dart';
 
 class OrderListScreen extends StatefulWidget {
   const OrderListScreen({super.key});
@@ -19,7 +18,8 @@ class OrderListScreen extends StatefulWidget {
   State<OrderListScreen> createState() => _OrderListScreenState();
 }
 
-class _OrderListScreenState extends State<OrderListScreen> with DrawerNavigationMixin {
+class _OrderListScreenState extends State<OrderListScreen>
+    with DrawerNavigationMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -64,7 +64,11 @@ class _OrderListScreenState extends State<OrderListScreen> with DrawerNavigation
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 56, color: Colors.black38),
+                  const Icon(
+                    Icons.error_outline,
+                    size: 56,
+                    color: Colors.black38,
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     'Error: ${state.error}',
@@ -86,13 +90,16 @@ class _OrderListScreenState extends State<OrderListScreen> with DrawerNavigation
             );
           }
 
-          if (state.orderList?.data == null ||
-              state.orderList!.data!.isEmpty) {
+          if (state.orderList?.data == null || state.orderList!.data!.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.shopping_cart_outlined, size: 64, color: Colors.black26),
+                  const Icon(
+                    Icons.shopping_cart_outlined,
+                    size: 64,
+                    color: Colors.black26,
+                  ),
                   const SizedBox(height: 12),
                   const Text(
                     'No Data Available',
@@ -119,10 +126,8 @@ class _OrderListScreenState extends State<OrderListScreen> with DrawerNavigation
 
           return OrderListWidget(
             orders: state.orderList!.data!,
-            onRefresh: () =>
-                context.read<OrderBloc>().add(GetOrderList()),
-            onDelete: (id) =>
-                context.read<OrderBloc>().add(DeleteOrder(id)),
+            onRefresh: () => context.read<OrderBloc>().add(GetOrderList()),
+            onDelete: (id) => context.read<OrderBloc>().add(DeleteOrder(id)),
             onTap: (order) {
               Navigator.push(
                 context,
@@ -138,23 +143,6 @@ class _OrderListScreenState extends State<OrderListScreen> with DrawerNavigation
             },
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.black87,
-        foregroundColor: Colors.white,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const CreateOrderScreen(),
-            ),
-          ).then((_) {
-            if (context.mounted) {
-              context.read<OrderBloc>().add(GetOrderList());
-            }
-          });
-        },
-        child: const Icon(Icons.add),
       ),
     );
   }

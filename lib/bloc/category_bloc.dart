@@ -69,6 +69,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     try {
       final deleted = await _apiCalls.deleteCategory(event.id);
       emit(state.copyWith(isLoading: false, deletedCategory: deleted));
+      add(GetCategoryList());
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: e.toString()));
     }
@@ -81,7 +82,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     emit(state.copyWith(isLoading: true, error: null));
     try {
       final category = await _apiCalls.viewCategory(event.id);
-      emit(state.copyWith(isLoading: false, categoryList: category));
+      // FIX: was emitting categoryList (wrong type) — now emits viewedCategory
+      emit(state.copyWith(isLoading: false, viewedCategory: category));
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: e.toString()));
     }

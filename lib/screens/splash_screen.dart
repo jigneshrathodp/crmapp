@@ -19,7 +19,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _checkTokenAndNavigate() async {
     await Future.delayed(const Duration(seconds: 2));
-    
+
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
@@ -46,7 +46,7 @@ class _SplashScreenState extends State<SplashScreen> {
             const FlutterLogo(size: 100),
             const SizedBox(height: 24),
             const Text(
-              'CRM App',
+              'Rizester App',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),

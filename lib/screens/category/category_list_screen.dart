@@ -9,7 +9,6 @@ import '../../widgets/custom_drawer.dart';
 import '../notification_screen.dart';
 import '../profile/profile_screen.dart';
 import '../../utils/navigation_mixin.dart';
-import 'create_category_screen.dart';
 import 'update_category_screen.dart';
 
 class CategoryListScreen extends StatefulWidget {
@@ -19,7 +18,8 @@ class CategoryListScreen extends StatefulWidget {
   State<CategoryListScreen> createState() => _CategoryListScreenState();
 }
 
-class _CategoryListScreenState extends State<CategoryListScreen> with DrawerNavigationMixin {
+class _CategoryListScreenState extends State<CategoryListScreen>
+    with DrawerNavigationMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -51,7 +51,29 @@ class _CategoryListScreenState extends State<CategoryListScreen> with DrawerNavi
         headerTitle: 'CRM App',
         headerSubtitle: 'Categories',
       ),
-      body: BlocBuilder<CategoryBloc, CategoryState>(
+      body: BlocConsumer<CategoryBloc, CategoryState>(
+        listenWhen: (previous, current) {
+          return (previous.deletedCategory != current.deletedCategory &&
+                  current.deletedCategory != null) ||
+                 (previous.error != current.error && current.error != null);
+        },
+        listener: (context, state) {
+          if (state.error != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error: ${state.error}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } else if (state.deletedCategory != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.deletedCategory!.message ?? 'Category deleted successfully'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
+        },
         builder: (context, state) {
           if (state.isLoading) {
             return const Center(
@@ -64,7 +86,11 @@ class _CategoryListScreenState extends State<CategoryListScreen> with DrawerNavi
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 56, color: Colors.black38),
+                  const Icon(
+                    Icons.error_outline,
+                    size: 56,
+                    color: Colors.black38,
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     'Error: ${state.error}',
@@ -92,7 +118,11 @@ class _CategoryListScreenState extends State<CategoryListScreen> with DrawerNavi
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.category_outlined, size: 64, color: Colors.black26),
+                  const Icon(
+                    Icons.category_outlined,
+                    size: 64,
+                    color: Colors.black26,
+                  ),
                   const SizedBox(height: 12),
                   const Text(
                     'No Data Available',
@@ -142,23 +172,6 @@ class _CategoryListScreenState extends State<CategoryListScreen> with DrawerNavi
             },
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.black87,
-        foregroundColor: Colors.white,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const CreateCategoryScreen(),
-            ),
-          ).then((_) {
-            if (context.mounted) {
-              context.read<CategoryBloc>().add(GetCategoryList());
-            }
-          });
-        },
-        child: const Icon(Icons.add),
       ),
     );
   }

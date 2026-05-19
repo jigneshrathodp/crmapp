@@ -183,7 +183,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with DrawerNaviga
                     ? Image.file(file,
                         width: 80, height: 80, fit: BoxFit.cover)
                     : (networkUrl != null && networkUrl.isNotEmpty)
-                        ? Image.network(networkUrl, width: 80, height: 80, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _buildPlaceholder())
+                        ? Image.network(networkUrl, width: 80, height: 80, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) => _buildPlaceholder())
                         : _buildPlaceholder(),
               ),
               const SizedBox(width: 12),

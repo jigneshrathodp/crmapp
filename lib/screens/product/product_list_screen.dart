@@ -9,7 +9,6 @@ import '../../widgets/custom_drawer.dart';
 import '../notification_screen.dart';
 import '../profile/profile_screen.dart';
 import '../../utils/navigation_mixin.dart';
-import 'create_product_screen.dart';
 import 'update_product_screen.dart';
 
 class ProductListScreen extends StatefulWidget {
@@ -19,7 +18,8 @@ class ProductListScreen extends StatefulWidget {
   State<ProductListScreen> createState() => _ProductListScreenState();
 }
 
-class _ProductListScreenState extends State<ProductListScreen> with DrawerNavigationMixin {
+class _ProductListScreenState extends State<ProductListScreen>
+    with DrawerNavigationMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -51,7 +51,29 @@ class _ProductListScreenState extends State<ProductListScreen> with DrawerNaviga
         headerTitle: 'CRM App',
         headerSubtitle: 'Products',
       ),
-      body: BlocBuilder<ProductBloc, ProductState>(
+      body: BlocConsumer<ProductBloc, ProductState>(
+        listenWhen: (previous, current) {
+          return (previous.deletedProduct != current.deletedProduct &&
+                  current.deletedProduct != null) ||
+                 (previous.error != current.error && current.error != null);
+        },
+        listener: (context, state) {
+          if (state.error != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error: ${state.error}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } else if (state.deletedProduct != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.deletedProduct!.message ?? 'Product deleted successfully'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
+        },
         builder: (context, state) {
           if (state.isLoading) {
             return const Center(
@@ -64,7 +86,11 @@ class _ProductListScreenState extends State<ProductListScreen> with DrawerNaviga
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 56, color: Colors.black38),
+                  const Icon(
+                    Icons.error_outline,
+                    size: 56,
+                    color: Colors.black38,
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     'Error: ${state.error}',
@@ -92,7 +118,11 @@ class _ProductListScreenState extends State<ProductListScreen> with DrawerNaviga
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.inventory_2_outlined, size: 64, color: Colors.black26),
+                  const Icon(
+                    Icons.inventory_2_outlined,
+                    size: 64,
+                    color: Colors.black26,
+                  ),
                   const SizedBox(height: 12),
                   const Text(
                     'No Data Available',
@@ -119,8 +149,7 @@ class _ProductListScreenState extends State<ProductListScreen> with DrawerNaviga
 
           return ProductListWidget(
             products: state.productList!.data!,
-            onRefresh: () =>
-                context.read<ProductBloc>().add(GetProductList()),
+            onRefresh: () => context.read<ProductBloc>().add(GetProductList()),
             onDelete: (id) =>
                 context.read<ProductBloc>().add(DeleteProduct(id)),
             onTap: (product) {
@@ -150,23 +179,6 @@ class _ProductListScreenState extends State<ProductListScreen> with DrawerNaviga
             },
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.black87,
-        foregroundColor: Colors.white,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const CreateProductScreen(),
-            ),
-          ).then((_) {
-            if (context.mounted) {
-              context.read<ProductBloc>().add(GetProductList());
-            }
-          });
-        },
-        child: const Icon(Icons.add),
       ),
     );
   }

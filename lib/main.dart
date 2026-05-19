@@ -37,10 +37,9 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => NotificationBloc(apiCalls)),
       ],
       child: MaterialApp(
-        title: 'CRM App',
+        title: 'Rizester App',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          // Fixed: was `.fromSeed(...)` missing the class name `ColorScheme`
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),

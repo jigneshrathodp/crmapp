@@ -26,7 +26,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with DrawerNaviga
   final _quantityController = TextEditingController();
   final _shippingCostController = TextEditingController();
   final _emailController = TextEditingController();
-  final _sellingPriceController = TextEditingController();
+  // selling_price_per_gram is NOT part of the create-order API — removed
 
   @override
   void dispose() {
@@ -37,7 +37,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with DrawerNaviga
     _quantityController.dispose();
     _shippingCostController.dispose();
     _emailController.dispose();
-    _sellingPriceController.dispose();
     super.dispose();
   }
 
@@ -52,7 +51,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with DrawerNaviga
           'quantity': int.tryParse(_quantityController.text) ?? 1,
           'shipping_cost': double.tryParse(_shippingCostController.text) ?? 0,
           'email': _emailController.text,
-          'selling_price_per_gram': _sellingPriceController.text,
         }),
       );
       // Let BlocListener handle snackbar and navigation.
@@ -171,13 +169,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with DrawerNaviga
                   decoration: _dec('Email'),
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) => v?.isEmpty ?? true ? 'Email is required' : null,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _sellingPriceController,
-                  decoration: _dec('Selling Price Per Gram'),
-                  keyboardType: TextInputType.number,
-                  validator: (v) => v?.isEmpty ?? true ? 'Selling Price is required' : null,
                 ),
                 const SizedBox(height: 24),
                 SizedBox(

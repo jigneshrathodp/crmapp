@@ -9,7 +9,6 @@ import '../../widgets/custom_drawer.dart';
 import '../notification_screen.dart';
 import '../profile/profile_screen.dart';
 import '../../utils/navigation_mixin.dart';
-import 'create_ads_screen.dart';
 import 'update_ads_screen.dart';
 
 class AdsListScreen extends StatefulWidget {
@@ -19,7 +18,8 @@ class AdsListScreen extends StatefulWidget {
   State<AdsListScreen> createState() => _AdsListScreenState();
 }
 
-class _AdsListScreenState extends State<AdsListScreen> with DrawerNavigationMixin {
+class _AdsListScreenState extends State<AdsListScreen>
+    with DrawerNavigationMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -64,7 +64,11 @@ class _AdsListScreenState extends State<AdsListScreen> with DrawerNavigationMixi
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 56, color: Colors.black38),
+                  const Icon(
+                    Icons.error_outline,
+                    size: 56,
+                    color: Colors.black38,
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     'Error: ${state.error}',
@@ -92,7 +96,11 @@ class _AdsListScreenState extends State<AdsListScreen> with DrawerNavigationMixi
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.campaign_outlined, size: 64, color: Colors.black26),
+                  const Icon(
+                    Icons.campaign_outlined,
+                    size: 64,
+                    color: Colors.black26,
+                  ),
                   const SizedBox(height: 12),
                   const Text(
                     'No Data Available',
@@ -144,21 +152,6 @@ class _AdsListScreenState extends State<AdsListScreen> with DrawerNavigationMixi
             },
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.black87,
-        foregroundColor: Colors.white,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CreateAdsScreen()),
-          ).then((_) {
-            if (context.mounted) {
-              context.read<AdvertiseBloc>().add(GetAdvertiseList());
-            }
-          });
-        },
-        child: const Icon(Icons.add),
       ),
     );
   }

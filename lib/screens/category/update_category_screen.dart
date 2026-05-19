@@ -160,7 +160,7 @@ class _UpdateCategoryScreenState extends State<UpdateCategoryScreen> with Drawer
                             ? Image.network(
                                 widget.categoryImage!,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) =>
+                                errorBuilder: (context, error, stackTrace) =>
                                     const Icon(Icons.category, size: 80, color: Colors.black26),
                               )
                             : const Column(

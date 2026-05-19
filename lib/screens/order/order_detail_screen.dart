@@ -64,14 +64,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> with DrawerNaviga
             );
           }
 
-          // After GetOrderDetail, detail is stored in state.orderDetail.
-          final list = state.orderDetail?.data ?? [];
-          final orderData = list.isEmpty
-              ? null
-              : list.firstWhere(
-                  (o) => o.orderId == widget.orderId,
-                  orElse: () => list.first,
-                );
+          // FIX: orderDetail is now ViewOrderModel with a single data object (not a list)
+          final orderData = state.orderDetail?.data;
 
           if (orderData == null) {
             return const Center(

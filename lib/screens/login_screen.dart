@@ -44,12 +44,12 @@ class _LoginScreenState extends State<LoginScreen> {
   );
 
   InputDecoration _dec(String label) => InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.black54),
-        border: _border,
-        enabledBorder: _border,
-        focusedBorder: _focusBorder,
-      );
+    labelText: label,
+    labelStyle: const TextStyle(color: Colors.black54),
+    border: _border,
+    enabledBorder: _border,
+    focusedBorder: _focusBorder,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +88,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Icon(Icons.store_rounded, size: 80, color: Colors.black87),
+                      const Icon(
+                        Icons.store_rounded,
+                        size: 80,
+                        color: Colors.black87,
+                      ),
                       const SizedBox(height: 24),
                       const Text(
                         'Welcome Back',
