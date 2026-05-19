@@ -26,11 +26,11 @@ class _ProfileScreenState extends State<ProfileScreen> with DrawerNavigationMixi
     context.read<ProfileBloc>().add(GetProfileDetails());
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
+      backgroundColor: Colors.white,
       appBar: CustomAppBar(
         title: 'Profile',
         onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
@@ -49,7 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> with DrawerNavigationMixi
       body: BlocBuilder<ProfileBloc, ProfileState>(
         builder: (context, state) {
           if (state.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator(color: Colors.black87));
           }
 
           if (state.error != null) {
@@ -57,11 +57,15 @@ class _ProfileScreenState extends State<ProfileScreen> with DrawerNavigationMixi
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Error: ${state.error}'),
+                  const Icon(Icons.error_outline, size: 56, color: Colors.black38),
+                  const SizedBox(height: 12),
+                  Text('Error: ${state.error}', style: const TextStyle(color: Colors.black54)),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () =>
-                        context.read<ProfileBloc>().add(GetProfileDetails()),
+                    onPressed: () => context.read<ProfileBloc>().add(GetProfileDetails()),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black87, foregroundColor: Colors.white,
+                    ),
                     child: const Text('Retry'),
                   ),
                 ],
@@ -70,65 +74,196 @@ class _ProfileScreenState extends State<ProfileScreen> with DrawerNavigationMixi
           }
 
           if (state.profileDetails == null) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator(color: Colors.black87));
           }
 
           final profile = state.profileDetails!;
+          // API: { status, user: { id, name, email, contact, image }, details: {...} }
+          final user = profile['user'] is Map
+              ? Map<String, dynamic>.from(profile['user'] as Map)
+              : profile;
+          final details = profile['details'] is Map
+              ? Map<String, dynamic>.from(profile['details'] as Map)
+              : {};
+              
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Card(
-                child: ListTile(
-                  leading: const Icon(Icons.person),
-                  title: const Text('Name'),
-                  subtitle: Text(profile['name']?.toString() ?? 'N/A'),
+              // Profile header card
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.black87,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ),
-              Card(
-                child: ListTile(
-                  leading: const Icon(Icons.email),
-                  title: const Text('Email'),
-                  subtitle: Text(profile['email']?.toString() ?? 'N/A'),
-                ),
-              ),
-              Card(
-                child: ListTile(
-                  leading: const Icon(Icons.phone),
-                  title: const Text('Contact'),
-                  subtitle: Text(profile['contact']?.toString() ?? 'N/A'),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: user['image'] != null && user['image'].toString().isNotEmpty
+                          ? ClipOval(
+                              child: Image.network(
+                                user['image'].toString(),
+                                width: 56,
+                                height: 56,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const Icon(Icons.person_rounded, color: Colors.white, size: 30),
+                              ),
+                            )
+                          : const Icon(Icons.person_rounded, color: Colors.white, size: 30),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            user['name']?.toString() ?? 'N/A',
+                            style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            user['email']?.toString() ?? 'N/A',
+                            style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.edit),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const EditProfileScreen(),
-                    ),
-                  ).then((_) =>
-                      context.read<ProfileBloc>().add(GetProfileDetails()));
-                },
-                label: const Text('Update Profile'),
+              _infoCard(Icons.phone_rounded, 'Contact', user['contact']?.toString() ?? 'N/A'),
+              
+              if (details.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                const Text('Company Details', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black87)),
+                const SizedBox(height: 12),
+                _infoCard(Icons.business_rounded, 'Site Name', details['site_name']?.toString() ?? 'N/A'),
+                const SizedBox(height: 12),
+                _infoCard(Icons.location_on_rounded, 'Address', details['address']?.toString() ?? 'N/A'),
+                const SizedBox(height: 12),
+                _infoCard(Icons.info_outline_rounded, 'Footer', details['footer']?.toString() ?? 'N/A'),
+                
+                if (details['fav_icon'] != null || details['logo_light'] != null || details['logo_dark'] != null) ...[
+                  const SizedBox(height: 24),
+                  const Text('Brand Assets', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black87)),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      if (details['fav_icon'] != null && details['fav_icon'].toString().isNotEmpty)
+                        _imageBox('Favicon', details['fav_icon'].toString()),
+                      if (details['logo_light'] != null && details['logo_light'].toString().isNotEmpty)
+                        _imageBox('Logo Light', details['logo_light'].toString()),
+                      if (details['logo_dark'] != null && details['logo_dark'].toString().isNotEmpty)
+                        _imageBox('Logo Dark', details['logo_dark'].toString()),
+                    ],
+                  ),
+                ],
+              ],
+
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity, height: 48,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+                    ).then((_) {
+                      if (context.mounted) {
+                        context.read<ProfileBloc>().add(GetProfileDetails());
+                      }
+                    });
+                  },
+                  label: const Text('Update Profile', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black87, foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
               ),
-              const SizedBox(height: 8),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.lock),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ChangePasswordScreen(),
-                    ),
-                  );
-                },
-                label: const Text('Reset Password'),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity, height: 48,
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.lock, color: Colors.black87),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ChangePasswordScreen()),
+                    );
+                  },
+                  label: const Text('Reset Password',
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87)),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.black87),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
               ),
             ],
           );
         },
       ),
+    );
+  }
+
+  Widget _infoCard(IconData icon, String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.black54, size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: const TextStyle(fontSize: 11, color: Colors.black45)),
+                const SizedBox(height: 2),
+                Text(value, style: const TextStyle(fontSize: 14, color: Colors.black87, fontWeight: FontWeight.w600)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _imageBox(String label, String url) {
+    return Column(
+      children: [
+        Container(
+          width: 70,
+          height: 70,
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Image.network(
+            url,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, color: Colors.black26, size: 30),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.black54, fontWeight: FontWeight.w500)),
+      ],
     );
   }
 }

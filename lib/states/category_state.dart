@@ -1,8 +1,11 @@
 import 'package:equatable/equatable.dart';
-import '../models/Category_model/GetCatgoryModel.dart';
-import '../models/Category_model/CreateCategoryModel.dart';
-import '../models/Category_model/UpdateCategoryModel.dart';
-import '../models/Category_model/DeleteCategoryModel.dart';
+import '../models/Category_model/get_catgory_model.dart';
+import '../models/Category_model/create_category_model.dart';
+import '../models/Category_model/update_category_model.dart';
+import '../models/Category_model/delete_category_model.dart';
+
+// Sentinel to distinguish "not provided" from explicit null in copyWith.
+const Object _sentinel = Object();
 
 class CategoryState extends Equatable {
   final bool isLoading;
@@ -27,7 +30,7 @@ class CategoryState extends Equatable {
     CreateCategoryModel? createdCategory,
     UpdateCategoryModel? updatedCategory,
     DeleteCategoryModel? deletedCategory,
-    String? error,
+    Object? error = _sentinel,
   }) {
     return CategoryState(
       isLoading: isLoading ?? this.isLoading,
@@ -35,7 +38,7 @@ class CategoryState extends Equatable {
       createdCategory: createdCategory ?? this.createdCategory,
       updatedCategory: updatedCategory ?? this.updatedCategory,
       deletedCategory: deletedCategory ?? this.deletedCategory,
-      error: error ?? this.error,
+      error: error == _sentinel ? this.error : error as String?,
     );
   }
 

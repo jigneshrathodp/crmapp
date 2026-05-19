@@ -66,7 +66,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
   }
 
   void _initializeCachedValues() {
-    _drawerBackgroundColor = widget.backgroundColor ?? const Color(0xFF1A1A2E);
+    _drawerBackgroundColor = widget.backgroundColor ?? Colors.black87;
     _selectedColor = widget.selectedItemColor ?? Colors.white;
     _unselectedColor = widget.unselectedItemColor ?? Colors.grey.shade400;
     _tileColor = widget.selectedTileColor ?? Colors.white.withValues(alpha: 0.12);

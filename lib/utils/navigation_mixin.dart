@@ -9,23 +9,29 @@ mixin DrawerNavigationMixin<T extends StatefulWidget> on State<T> {
       case 0:
         return '/dashboard';
       case 1:
+        return '/create-order';
       case 2:
         return '/orders';
       case 3:
-      case 4:
         return '/products';
+      case 4:
+        return '/create-product';
       case 5:
-      case 6:
         return '/categories';
+      case 6:
+        return '/create-category';
       case 7:
-      case 8:
         return '/advertisements';
+      case 8:
+        return '/create-ad';
       case 9:
         return '/notifications';
       case 10:
-      case 11:
-      case 12:
         return '/profile';
+      case 11:
+        return '/edit-profile';
+      case 12:
+        return '/change-password';
       default:
         return '/dashboard';
     }

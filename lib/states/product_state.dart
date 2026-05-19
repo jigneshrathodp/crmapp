@@ -1,8 +1,11 @@
 import 'package:equatable/equatable.dart';
-import '../models/product_model/GetproductModel.dart';
-import '../models/product_model/CreateProductModel.dart';
-import '../models/product_model/UpdateProductModel.dart';
-import '../models/product_model/DeleteProductModel.dart';
+import '../models/product_model/get_product_model.dart';
+import '../models/product_model/create_product_model.dart';
+import '../models/product_model/update_product_model.dart';
+import '../models/product_model/delete_product_model.dart';
+
+// Sentinel to distinguish "not provided" from explicit null in copyWith.
+const Object _sentinel = Object();
 
 class ProductState extends Equatable {
   final bool isLoading;
@@ -27,7 +30,7 @@ class ProductState extends Equatable {
     CreateProductModel? createdProduct,
     UpdateProductModel? updatedProduct,
     DeleteProductModel? deletedProduct,
-    String? error,
+    Object? error = _sentinel,
   }) {
     return ProductState(
       isLoading: isLoading ?? this.isLoading,
@@ -35,7 +38,7 @@ class ProductState extends Equatable {
       createdProduct: createdProduct ?? this.createdProduct,
       updatedProduct: updatedProduct ?? this.updatedProduct,
       deletedProduct: deletedProduct ?? this.deletedProduct,
-      error: error ?? this.error,
+      error: error == _sentinel ? this.error : error as String?,
     );
   }
 

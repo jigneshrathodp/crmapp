@@ -30,6 +30,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
+      backgroundColor: Colors.white,
       appBar: CustomAppBar(
         title: 'Dashboard',
         onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
@@ -51,7 +52,9 @@ class _DashboardScreenState extends State<DashboardScreen>
       body: BlocBuilder<DashboardBloc, DashboardState>(
         builder: (context, state) {
           if (state.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.black87),
+            );
           }
 
           if (state.error != null) {
@@ -59,20 +62,20 @@ class _DashboardScreenState extends State<DashboardScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline,
-                      size: 64, color: Colors.redAccent),
+                  const Icon(Icons.error_outline, size: 64, color: Colors.black54),
                   const SizedBox(height: 16),
                   Text(
                     'Error: ${state.error}',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.red),
+                    style: const TextStyle(color: Colors.black54),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
                     onPressed: () =>
                         context.read<DashboardBloc>().add(GetDashboard()),
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Retry'),
+                    icon: const Icon(Icons.refresh, color: Colors.white),
+                    label: const Text('Retry', style: TextStyle(color: Colors.white)),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.black87),
                   ),
                 ],
               ),
@@ -86,6 +89,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           final data = state.dashboardData!;
 
           return RefreshIndicator(
+            color: Colors.black87,
             onRefresh: () async =>
                 context.read<DashboardBloc>().add(GetDashboard()),
             child: SingleChildScrollView(
@@ -94,76 +98,20 @@ class _DashboardScreenState extends State<DashboardScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Welcome banner
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.deepPurple.shade600,
-                          Colors.deepPurple.shade400,
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Welcome Back!',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                'CRM Dashboard',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Icon(
-                          Icons.dashboard_rounded,
-                          color: Colors.white30,
-                          size: 56,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Stats heading
+                  // ── Header ────────────────────────────────────────
                   const Text(
-                    'Overview',
+                    'DASHBOARD',
                     style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
                       color: Colors.black87,
+                      letterSpacing: 1.2,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
 
-                  // Stats Grid - dynamic from API
+                  // ── Stats Grid ────────────────────────────────────
                   _buildStatsGrid(data),
-
-                  const SizedBox(height: 20),
-
-                  // Additional data if present
-                  if (data.containsKey('recent_orders') &&
-                      data['recent_orders'] != null)
-                    _buildRecentOrders(data['recent_orders']),
                 ],
               ),
             ),
@@ -174,87 +122,117 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   Widget _buildStatsGrid(Map<String, dynamic> data) {
-    // Build stat cards from known API fields
+    // The API returns: { status, message, data: { stats: {...}, profile, details, notifications } }
+    // Extract the 'stats' sub-object. Support both direct-flat maps and wrapped responses.
+    final Map<String, dynamic> statsMap = (data['stats'] is Map)
+        ? Map<String, dynamic>.from(data['stats'] as Map)
+        : data;
+
     final List<_StatItem> stats = [];
 
-    if (data.containsKey('total_categories')) {
+    if (statsMap.containsKey('total_categories')) {
       stats.add(_StatItem(
         label: 'Total Categories',
-        value: '${data['total_categories'] ?? 0}',
-        icon: Icons.category_rounded,
-        color: Colors.blue,
+        value: '${statsMap['total_categories'] ?? 0}',
+        icon: Icons.format_list_bulleted_rounded,
       ));
     }
 
-    if (data.containsKey('total_products')) {
+    if (statsMap.containsKey('total_products')) {
       stats.add(_StatItem(
         label: 'Total Products',
-        value: '${data['total_products'] ?? 0}',
+        value: '${statsMap['total_products'] ?? 0}',
         icon: Icons.inventory_2_rounded,
-        color: Colors.green,
       ));
     }
 
-    if (data.containsKey('total_orders')) {
+    if (statsMap.containsKey('total_sold_products')) {
+      stats.add(_StatItem(
+        label: 'Sold Products',
+        value: '${statsMap['total_sold_products'] ?? 0}',
+        icon: Icons.local_offer_rounded,
+      ));
+    }
+
+    if (statsMap.containsKey('total_orders')) {
       stats.add(_StatItem(
         label: 'Total Orders',
-        value: '${data['total_orders'] ?? 0}',
-        icon: Icons.shopping_cart_rounded,
-        color: Colors.orange,
+        value: '${statsMap['total_orders'] ?? 0}',
+        icon: Icons.receipt_long_rounded,
       ));
     }
 
-    if (data.containsKey('total_advertises') ||
-        data.containsKey('total_ads')) {
+    if (statsMap.containsKey('current_month_orders')) {
       stats.add(_StatItem(
-        label: 'Advertisements',
-        value:
-            '${data['total_advertises'] ?? data['total_ads'] ?? 0}',
-        icon: Icons.campaign_rounded,
-        color: Colors.purple,
+        label: 'Current Month Orders',
+        value: '${statsMap['current_month_orders'] ?? 0}',
+        icon: Icons.calendar_month_rounded,
       ));
     }
 
-    if (data.containsKey('total_revenue')) {
+    if (statsMap.containsKey('total_product_cost')) {
       stats.add(_StatItem(
-        label: 'Total Revenue',
-        value: '₹${data['total_revenue'] ?? 0}',
-        icon: Icons.currency_rupee_rounded,
-        color: Colors.teal,
+        label: 'Total Product Cost',
+        value: '₹${statsMap['total_product_cost'] ?? 0}',
+        icon: Icons.shopping_bag_rounded,
       ));
     }
 
-    if (data.containsKey('total_customers')) {
+    if (statsMap.containsKey('total_sold_price')) {
       stats.add(_StatItem(
-        label: 'Customers',
-        value: '${data['total_customers'] ?? 0}',
-        icon: Icons.people_rounded,
-        color: Colors.indigo,
+        label: 'Total Sold Price',
+        value: '₹${statsMap['total_sold_price'] ?? 0}',
+        icon: Icons.attach_money_rounded,
       ));
     }
 
-    // If no known keys, display raw data as key-value chips
+    if (statsMap.containsKey('total_advertisements')) {
+      stats.add(_StatItem(
+        label: 'Total Advertisements',
+        value: '${statsMap['total_advertisements'] ?? 0}',
+        icon: Icons.ad_units_rounded,
+      ));
+    }
+
+    if (statsMap.containsKey('total_advertise_price')) {
+      stats.add(_StatItem(
+        label: 'Total Advertise Price',
+        value: '₹${statsMap['total_advertise_price'] ?? 0}',
+        icon: Icons.receipt_rounded,
+      ));
+    }
+
+    // Fallback: show raw data if no known keys matched
     if (stats.isEmpty) {
       return Wrap(
         spacing: 12,
         runSpacing: 12,
-        children: data.entries.map((e) {
-          return _buildRawStatCard(
-            e.key.replaceAll('_', ' ').toUpperCase(),
-            '${e.value ?? 'N/A'}',
-          );
+        children: statsMap.entries.map((e) {
+          return _buildStatCard(_StatItem(
+            label: e.key.replaceAll('_', ' ').toUpperCase(),
+            value: '${e.value ?? 'N/A'}',
+            icon: Icons.bar_chart_rounded,
+          ));
         }).toList(),
       );
     }
 
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
-      childAspectRatio: 1.5,
-      children: stats.map((s) => _buildStatCard(s)).toList(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = (constraints.maxWidth / 200).floor().clamp(1, 4);
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: stats.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.6,
+          ),
+          itemBuilder: (_, i) => _buildStatCard(stats[i]),
+        );
+      },
     );
   }
 
@@ -262,142 +240,61 @@ class _DashboardScreenState extends State<DashboardScreen>
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: item.color.withValues(alpha: 0.12),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
         ],
-        border: Border.all(color: item.color.withValues(alpha: 0.15)),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: item.color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(item.icon, color: item.color, size: 24),
-          ),
-          const SizedBox(width: 12),
+          // Left side: label + value
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  item.value,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: item.color,
-                  ),
-                ),
-                Text(
                   item.label,
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Colors.grey,
+                    color: Colors.black54,
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(height: 6),
+                Text(
+                  item.value,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRawStatCard(String label, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.deepPurple.withValues(alpha: 0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-        border: Border.all(color: Colors.deepPurple.withValues(alpha: 0.1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.deepPurple.shade600,
+          const SizedBox(width: 8),
+          // Right side: black circle icon
+          Container(
+            width: 44,
+            height: 44,
+            decoration: const BoxDecoration(
+              color: Colors.black87,
+              shape: BoxShape.circle,
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 11, color: Colors.grey),
+            child: Icon(item.icon, color: Colors.white, size: 22),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildRecentOrders(dynamic orders) {
-    if (orders is! List || orders.isEmpty) return const SizedBox();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Recent Orders',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 10),
-        ...orders.take(5).map((o) {
-          return Card(
-            margin: const EdgeInsets.only(bottom: 8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Colors.orange.shade50,
-                child:
-                    Icon(Icons.shopping_cart, color: Colors.orange.shade400),
-              ),
-              title: Text(
-                'Order #${o['order_id'] ?? o['id'] ?? 'N/A'}',
-                style: const TextStyle(
-                    fontWeight: FontWeight.w600, fontSize: 14),
-              ),
-              subtitle: Text(
-                o['customer']?['name'] ?? o['customer_name'] ?? 'N/A',
-                style: const TextStyle(fontSize: 12),
-              ),
-              trailing: Text(
-                '₹${o['pricing']?['total_price'] ?? o['total'] ?? 'N/A'}',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green.shade600,
-                ),
-              ),
-            ),
-          );
-        }),
-      ],
     );
   }
 }
@@ -406,12 +303,10 @@ class _StatItem {
   final String label;
   final String value;
   final IconData icon;
-  final Color color;
 
   const _StatItem({
     required this.label,
     required this.value,
     required this.icon,
-    required this.color,
   });
 }

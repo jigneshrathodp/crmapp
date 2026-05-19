@@ -32,6 +32,7 @@ class _AdsListScreenState extends State<AdsListScreen> with DrawerNavigationMixi
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
+      backgroundColor: Colors.white,
       appBar: CustomAppBar(
         title: 'Advertisements',
         onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
@@ -53,7 +54,9 @@ class _AdsListScreenState extends State<AdsListScreen> with DrawerNavigationMixi
       body: BlocBuilder<AdvertiseBloc, AdvertiseState>(
         builder: (context, state) {
           if (state.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.black87),
+            );
           }
 
           if (state.error != null) {
@@ -61,11 +64,21 @@ class _AdsListScreenState extends State<AdsListScreen> with DrawerNavigationMixi
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Error: ${state.error}'),
+                  const Icon(Icons.error_outline, size: 56, color: Colors.black38),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Error: ${state.error}',
+                    style: const TextStyle(color: Colors.black54),
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () =>
                         context.read<AdvertiseBloc>().add(GetAdvertiseList()),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black87,
+                      foregroundColor: Colors.white,
+                    ),
                     child: const Text('Retry'),
                   ),
                 ],
@@ -79,11 +92,24 @@ class _AdsListScreenState extends State<AdsListScreen> with DrawerNavigationMixi
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('No advertisements found'),
+                  const Icon(Icons.campaign_outlined, size: 64, color: Colors.black26),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'No Data Available',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black54,
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () =>
                         context.read<AdvertiseBloc>().add(GetAdvertiseList()),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black87,
+                      foregroundColor: Colors.white,
+                    ),
                     child: const Text('Refresh'),
                   ),
                 ],
@@ -110,19 +136,27 @@ class _AdsListScreenState extends State<AdsListScreen> with DrawerNavigationMixi
                     advertiseSocialMedia: advertise.socialmedia,
                   ),
                 ),
-              ).then(
-                (_) => context.read<AdvertiseBloc>().add(GetAdvertiseList()),
-              );
+              ).then((_) {
+                if (context.mounted) {
+                  context.read<AdvertiseBloc>().add(GetAdvertiseList());
+                }
+              });
             },
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.black87,
+        foregroundColor: Colors.white,
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const CreateAdsScreen()),
-          ).then((_) => context.read<AdvertiseBloc>().add(GetAdvertiseList()));
+          ).then((_) {
+            if (context.mounted) {
+              context.read<AdvertiseBloc>().add(GetAdvertiseList());
+            }
+          });
         },
         child: const Icon(Icons.add),
       ),

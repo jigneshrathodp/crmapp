@@ -6,6 +6,11 @@ import 'package:http/http.dart' as http;
 import '../../bloc/category_bloc.dart';
 import '../../events/category_events.dart';
 import '../../states/category_state.dart';
+import '../../widgets/custom_app_bar.dart';
+import '../../widgets/custom_drawer.dart';
+import '../notification_screen.dart';
+import '../profile/profile_screen.dart';
+import '../../utils/navigation_mixin.dart';
 
 class CreateCategoryScreen extends StatefulWidget {
   const CreateCategoryScreen({super.key});
@@ -14,7 +19,8 @@ class CreateCategoryScreen extends StatefulWidget {
   State<CreateCategoryScreen> createState() => _CreateCategoryScreenState();
 }
 
-class _CreateCategoryScreenState extends State<CreateCategoryScreen> {
+class _CreateCategoryScreenState extends State<CreateCategoryScreen> with DrawerNavigationMixin {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _skuController = TextEditingController();
@@ -39,47 +45,82 @@ class _CreateCategoryScreenState extends State<CreateCategoryScreen> {
     if (_formKey.currentState!.validate()) {
       if (_selectedImage == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a category image')),
+          const SnackBar(
+            content: Text('Please select a category image'),
+            backgroundColor: Colors.black87,
+          ),
         );
         return;
       }
-      final imageFile = await http.MultipartFile.fromPath(
-        'image',
-        _selectedImage!.path,
-      );
+      final imageFile = await http.MultipartFile.fromPath('image', _selectedImage!.path);
       if (!mounted) return;
       context.read<CategoryBloc>().add(
         CreateCategory(
-          {
-            'name': _nameController.text,
-            'skubar_code': _skuController.text,
-          },
+          {'name': _nameController.text, 'skubar_code': _skuController.text},
           imageFile: imageFile,
         ),
       );
-      Navigator.pop(context);
+      // Let BlocListener handle snackbar and navigation.
     }
   }
+
+  static const _border = OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(8)),
+    borderSide: BorderSide(color: Colors.black26),
+  );
+  static const _focusBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(8)),
+    borderSide: BorderSide(color: Colors.black87, width: 1.5),
+  );
+
+  InputDecoration _dec(String label) => InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.black54),
+        border: _border,
+        enabledBorder: _border,
+        focusedBorder: _focusBorder,
+      );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Category'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 1,
+      key: _scaffoldKey,
+      backgroundColor: Colors.white,
+      appBar: CustomAppBar(
+        title: 'Create Category',
+        onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        onNotificationPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const NotificationScreen()),
+        ),
+        onProfilePressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        ),
+      ),
+      drawer: CustomDrawer(
+        selectedIndex: 5,
+        onItemTapped: onDrawerItemTapped,
+        headerTitle: 'CRM App',
+        headerSubtitle: 'Create Category',
       ),
       body: BlocListener<CategoryBloc, CategoryState>(
         listener: (context, state) {
           if (!state.isLoading && state.error == null && state.createdCategory != null) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Category created successfully')),
+              const SnackBar(
+                content: Text('Category created successfully'),
+                backgroundColor: Colors.black87,
+              ),
             );
+            Navigator.pop(context);
           }
           if (state.error != null) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: ${state.error}')),
+              SnackBar(
+                content: Text('Error: ${state.error}'),
+                backgroundColor: Colors.black87,
+              ),
             );
           }
         },
@@ -89,24 +130,17 @@ class _CreateCategoryScreenState extends State<CreateCategoryScreen> {
             key: _formKey,
             child: ListView(
               children: [
+                const SizedBox(height: 4),
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Name',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) =>
-                      value?.isEmpty ?? true ? 'Name is required' : null,
+                  decoration: _dec('Name'),
+                  validator: (v) => v?.isEmpty ?? true ? 'Name is required' : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _skuController,
-                  decoration: const InputDecoration(
-                    labelText: 'SKU Barcode',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) =>
-                      value?.isEmpty ?? true ? 'SKU is required' : null,
+                  decoration: _dec('SKU Barcode'),
+                  validator: (v) => v?.isEmpty ?? true ? 'SKU is required' : null,
                 ),
                 const SizedBox(height: 16),
                 // Image picker
@@ -115,8 +149,9 @@ class _CreateCategoryScreenState extends State<CreateCategoryScreen> {
                   child: Container(
                     height: 160,
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
+                      border: Border.all(color: Colors.black26),
                       borderRadius: BorderRadius.circular(8),
+                      color: Colors.grey.shade50,
                     ),
                     child: _selectedImage != null
                         ? ClipRRect(
@@ -130,10 +165,12 @@ class _CreateCategoryScreenState extends State<CreateCategoryScreen> {
                         : const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.add_photo_alternate, size: 48, color: Colors.grey),
+                              Icon(Icons.add_photo_alternate, size: 48, color: Colors.black38),
                               SizedBox(height: 8),
-                              Text('Tap to select image (required)',
-                                  style: TextStyle(color: Colors.grey)),
+                              Text(
+                                'Tap to select image (required)',
+                                style: TextStyle(color: Colors.black45),
+                              ),
                             ],
                           ),
                   ),
@@ -142,16 +179,24 @@ class _CreateCategoryScreenState extends State<CreateCategoryScreen> {
                 BlocBuilder<CategoryBloc, CategoryState>(
                   builder: (context, state) => SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton.icon(
+                    height: 48,
+                    child: ElevatedButton(
                       onPressed: state.isLoading ? null : _submit,
-                      icon: state.isLoading
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black87,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: state.isLoading
                           ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
                             )
-                          : const Icon(Icons.save),
-                      label: const Text('Create'),
+                          : const Text('Create', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ),

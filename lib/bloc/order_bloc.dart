@@ -60,7 +60,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     emit(state.copyWith(isLoading: true, error: null));
     try {
       final order = await _apiCalls.getOrderDetail(event.id);
-      emit(state.copyWith(isLoading: false, orderList: order));
+      emit(state.copyWith(isLoading: false, orderDetail: order));
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: e.toString()));
     }

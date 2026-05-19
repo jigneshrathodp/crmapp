@@ -6,6 +6,11 @@ import 'package:http/http.dart' as http;
 import '../../bloc/category_bloc.dart';
 import '../../events/category_events.dart';
 import '../../states/category_state.dart';
+import '../../widgets/custom_app_bar.dart';
+import '../../widgets/custom_drawer.dart';
+import '../notification_screen.dart';
+import '../profile/profile_screen.dart';
+import '../../utils/navigation_mixin.dart';
 
 class UpdateCategoryScreen extends StatefulWidget {
   final int categoryId;
@@ -25,7 +30,8 @@ class UpdateCategoryScreen extends StatefulWidget {
   State<UpdateCategoryScreen> createState() => _UpdateCategoryScreenState();
 }
 
-class _UpdateCategoryScreenState extends State<UpdateCategoryScreen> {
+class _UpdateCategoryScreenState extends State<UpdateCategoryScreen> with DrawerNavigationMixin {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _skuController;
@@ -63,36 +69,70 @@ class _UpdateCategoryScreenState extends State<UpdateCategoryScreen> {
       context.read<CategoryBloc>().add(
         UpdateCategory(
           widget.categoryId,
-          {
-            'name': _nameController.text,
-            'skubar_code': _skuController.text,
-          },
+          {'name': _nameController.text, 'skubar_code': _skuController.text},
           imageFile: imageFile,
         ),
       );
     }
   }
 
+  static const _border = OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(8)),
+    borderSide: BorderSide(color: Colors.black26),
+  );
+  static const _focusBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(8)),
+    borderSide: BorderSide(color: Colors.black87, width: 1.5),
+  );
+
+  InputDecoration _dec(String label) => InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.black54),
+        border: _border,
+        enabledBorder: _border,
+        focusedBorder: _focusBorder,
+      );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Update Category'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 1,
+      key: _scaffoldKey,
+      backgroundColor: Colors.white,
+      appBar: CustomAppBar(
+        title: 'Update Category',
+        onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        onNotificationPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const NotificationScreen()),
+        ),
+        onProfilePressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        ),
+      ),
+      drawer: CustomDrawer(
+        selectedIndex: 5,
+        onItemTapped: onDrawerItemTapped,
+        headerTitle: 'CRM App',
+        headerSubtitle: 'Update Category',
       ),
       body: BlocListener<CategoryBloc, CategoryState>(
         listener: (context, state) {
           if (!state.isLoading && state.error == null && state.updatedCategory != null) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Category updated successfully')),
+              const SnackBar(
+                content: Text('Category updated successfully'),
+                backgroundColor: Colors.black87,
+              ),
             );
             Navigator.pop(context);
           }
           if (state.error != null) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: ${state.error}')),
+              SnackBar(
+                content: Text('Error: ${state.error}'),
+                backgroundColor: Colors.black87,
+              ),
             );
           }
         },
@@ -108,8 +148,9 @@ class _UpdateCategoryScreenState extends State<UpdateCategoryScreen> {
                   height: 160,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
+                    border: Border.all(color: Colors.black26),
                     borderRadius: BorderRadius.circular(12),
+                    color: Colors.grey.shade50,
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
@@ -120,25 +161,24 @@ class _UpdateCategoryScreenState extends State<UpdateCategoryScreen> {
                                 widget.categoryImage!,
                                 fit: BoxFit.cover,
                                 errorBuilder: (_, _, _) =>
-                                    const Icon(Icons.category, size: 80),
+                                    const Icon(Icons.category, size: 80, color: Colors.black26),
                               )
                             : const Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.add_photo_alternate,
-                                      size: 48, color: Colors.grey),
+                                  Icon(Icons.add_photo_alternate, size: 48, color: Colors.black38),
                                   SizedBox(height: 8),
                                   Text('Tap to change image',
-                                      style: TextStyle(color: Colors.grey)),
+                                      style: TextStyle(color: Colors.black45)),
                                 ],
                               )),
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               const Text(
                 'Tap image to select a new one (optional)',
-                style: TextStyle(color: Colors.grey, fontSize: 12),
+                style: TextStyle(color: Colors.black38, fontSize: 12),
               ),
               const SizedBox(height: 20),
               Form(
@@ -147,39 +187,40 @@ class _UpdateCategoryScreenState extends State<UpdateCategoryScreen> {
                   children: [
                     TextFormField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Name',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) =>
-                          value?.isEmpty ?? true ? 'Name is required' : null,
+                      decoration: _dec('Name'),
+                      validator: (v) => v?.isEmpty ?? true ? 'Name is required' : null,
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _skuController,
-                      decoration: const InputDecoration(
-                        labelText: 'SKU Barcode',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) =>
-                          value?.isEmpty ?? true ? 'SKU is required' : null,
+                      decoration: _dec('SKU Barcode'),
+                      validator: (v) => v?.isEmpty ?? true ? 'SKU is required' : null,
                     ),
                     const SizedBox(height: 24),
                     BlocBuilder<CategoryBloc, CategoryState>(
                       builder: (context, state) {
                         return SizedBox(
                           width: double.infinity,
-                          child: ElevatedButton.icon(
+                          height: 48,
+                          child: ElevatedButton(
                             onPressed: state.isLoading ? null : _updateCategory,
-                            icon: state.isLoading
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black87,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                            ),
+                            child: state.isLoading
                                 ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child:
-                                        CircularProgressIndicator(strokeWidth: 2),
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
                                   )
-                                : const Icon(Icons.save),
-                            label: const Text('Update'),
+                                : const Text('Update',
+                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                           ),
                         );
                       },

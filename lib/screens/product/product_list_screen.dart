@@ -32,6 +32,7 @@ class _ProductListScreenState extends State<ProductListScreen> with DrawerNaviga
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
+      backgroundColor: Colors.white,
       appBar: CustomAppBar(
         title: 'Products',
         onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
@@ -53,7 +54,9 @@ class _ProductListScreenState extends State<ProductListScreen> with DrawerNaviga
       body: BlocBuilder<ProductBloc, ProductState>(
         builder: (context, state) {
           if (state.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.black87),
+            );
           }
 
           if (state.error != null) {
@@ -61,11 +64,21 @@ class _ProductListScreenState extends State<ProductListScreen> with DrawerNaviga
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Error: ${state.error}'),
+                  const Icon(Icons.error_outline, size: 56, color: Colors.black38),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Error: ${state.error}',
+                    style: const TextStyle(color: Colors.black54),
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () =>
                         context.read<ProductBloc>().add(GetProductList()),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black87,
+                      foregroundColor: Colors.white,
+                    ),
                     child: const Text('Retry'),
                   ),
                 ],
@@ -79,11 +92,24 @@ class _ProductListScreenState extends State<ProductListScreen> with DrawerNaviga
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('No products found'),
+                  const Icon(Icons.inventory_2_outlined, size: 64, color: Colors.black26),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'No Data Available',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black54,
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () =>
                         context.read<ProductBloc>().add(GetProductList()),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black87,
+                      foregroundColor: Colors.white,
+                    ),
                     child: const Text('Refresh'),
                   ),
                 ],
@@ -116,19 +142,29 @@ class _ProductListScreenState extends State<ProductListScreen> with DrawerNaviga
                     forSale: product.forSale,
                   ),
                 ),
-              ).then((_) => context.read<ProductBloc>().add(GetProductList()));
+              ).then((_) {
+                if (context.mounted) {
+                  context.read<ProductBloc>().add(GetProductList());
+                }
+              });
             },
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.black87,
+        foregroundColor: Colors.white,
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const CreateProductScreen(),
             ),
-          ).then((_) => context.read<ProductBloc>().add(GetProductList()));
+          ).then((_) {
+            if (context.mounted) {
+              context.read<ProductBloc>().add(GetProductList());
+            }
+          });
         },
         child: const Icon(Icons.add),
       ),

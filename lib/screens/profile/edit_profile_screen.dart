@@ -6,6 +6,11 @@ import 'package:http/http.dart' as http;
 import '../../bloc/profile_bloc.dart';
 import '../../events/profile_events.dart';
 import '../../states/profile_state.dart';
+import '../../widgets/custom_app_bar.dart';
+import '../../widgets/custom_drawer.dart';
+import '../notification_screen.dart';
+import 'profile_screen.dart';
+import '../../utils/navigation_mixin.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -14,7 +19,8 @@ class EditProfileScreen extends StatefulWidget {
   State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
-class _EditProfileScreenState extends State<EditProfileScreen> {
+class _EditProfileScreenState extends State<EditProfileScreen> with DrawerNavigationMixin {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
 
   // User fields
@@ -33,7 +39,36 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   File? _logoDarkImage;
   File? _logoLightImage;
 
+  String? _existingProfileImage;
+  String? _existingFavIcon;
+  String? _existingLogoDark;
+  String? _existingLogoLight;
+
   final _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    final state = context.read<ProfileBloc>().state;
+    final profile = state.profileDetails;
+    if (profile != null) {
+      final user = profile['user'] is Map ? profile['user'] as Map : profile;
+      final details = profile['details'] is Map ? profile['details'] as Map : {};
+      
+      _nameController.text = user['name']?.toString() ?? '';
+      _emailController.text = user['email']?.toString() ?? '';
+      _phoneController.text = user['contact']?.toString() ?? '';
+      
+      _siteNameController.text = details['site_name']?.toString() ?? '';
+      _footerController.text = details['footer']?.toString() ?? '';
+      _addressController.text = details['address']?.toString() ?? '';
+
+      _existingProfileImage = user['image']?.toString();
+      _existingFavIcon = details['fav_icon']?.toString();
+      _existingLogoDark = details['logo_dark']?.toString();
+      _existingLogoLight = details['logo_light']?.toString();
+    }
+  }
 
   @override
   void dispose() {
@@ -102,14 +137,32 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       context.read<ProfileBloc>().add(
         UpdateProfile(fields, imageFiles: imageFiles.isEmpty ? null : imageFiles),
       );
-      Navigator.pop(context);
+      // BlocListener will handle success snackbar and navigation.
     }
   }
+
+  static const _border = OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(8)),
+    borderSide: BorderSide(color: Colors.black26),
+  );
+  static const _focusBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(8)),
+    borderSide: BorderSide(color: Colors.black87, width: 1.5),
+  );
+
+  InputDecoration _dec(String label) => InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.black54),
+        border: _border,
+        enabledBorder: _border,
+        focusedBorder: _focusBorder,
+      );
 
   Widget _imageTile({
     required String label,
     required String field,
     required File? file,
+    String? networkUrl,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -129,20 +182,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 child: file != null
                     ? Image.file(file,
                         width: 80, height: 80, fit: BoxFit.cover)
-                    : Container(
-                        width: 80,
-                        height: 80,
-                        color: Colors.grey.shade200,
-                        child: const Icon(Icons.add_photo_alternate,
-                            color: Colors.grey),
-                      ),
+                    : (networkUrl != null && networkUrl.isNotEmpty)
+                        ? Image.network(networkUrl, width: 80, height: 80, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _buildPlaceholder())
+                        : _buildPlaceholder(),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  file != null ? '$label selected ✓' : 'Tap to select $label (optional)',
+                  file != null 
+                      ? '$label selected ✓' 
+                      : (networkUrl != null && networkUrl.isNotEmpty)
+                          ? 'Tap to change $label'
+                          : 'Tap to select $label (optional)',
                   style: TextStyle(
-                    color: file != null ? Colors.green : Colors.grey,
+                    color: file != null ? Colors.black87 : Colors.black54,
+                    fontWeight: file != null ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
               ),
@@ -153,25 +207,55 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
+  Widget _buildPlaceholder() {
+    return Container(
+      width: 80,
+      height: 80,
+      color: Colors.grey.shade200,
+      child: const Icon(Icons.add_photo_alternate, color: Colors.grey),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Profile'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 1,
+      key: _scaffoldKey,
+      backgroundColor: Colors.white,
+      appBar: CustomAppBar(
+        title: 'Edit Profile',
+        onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        onNotificationPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const NotificationScreen()),
+        ),
+        onProfilePressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        ),
+      ),
+      drawer: CustomDrawer(
+        selectedIndex: 8,
+        onItemTapped: onDrawerItemTapped,
+        headerTitle: 'CRM App',
+        headerSubtitle: 'Edit Profile',
       ),
       body: BlocListener<ProfileBloc, ProfileState>(
         listener: (context, state) {
           if (!state.isLoading && state.error == null && state.profileDetails != null) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Profile updated successfully')),
+              const SnackBar(
+                content: Text('Profile updated successfully'),
+                backgroundColor: Colors.black87,
+              ),
             );
+            Navigator.pop(context);
           }
           if (state.error != null) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: ${state.error}')),
+              SnackBar(
+                content: Text('Error: ${state.error}'),
+                backgroundColor: Colors.black87,
+              ),
             );
           }
         },
@@ -187,20 +271,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Name',
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: _dec('Name'),
                   validator: (value) =>
                       value?.isEmpty ?? true ? 'Name is required' : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: _dec('Email'),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) =>
                       value?.isEmpty ?? true ? 'Email is required' : null,
@@ -208,10 +286,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _phoneController,
-                  decoration: const InputDecoration(
-                    labelText: 'Contact / Phone',
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: _dec('Contact / Phone'),
                   keyboardType: TextInputType.phone,
                   validator: (value) =>
                       value?.isEmpty ?? true ? 'Contact is required' : null,
@@ -223,26 +298,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _siteNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Site Name (optional)',
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: _dec('Site Name (optional)'),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _footerController,
-                  decoration: const InputDecoration(
-                    labelText: 'Footer Text (optional)',
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: _dec('Footer Text (optional)'),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _addressController,
-                  decoration: const InputDecoration(
-                    labelText: 'Address (optional)',
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: _dec('Address (optional)'),
                   maxLines: 2,
                 ),
                 const SizedBox(height: 20),
@@ -251,26 +317,32 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 const SizedBox(height: 12),
                 _imageTile(
-                    label: 'Profile Image', field: 'image', file: _profileImage),
+                    label: 'Profile Image', field: 'image', file: _profileImage, networkUrl: _existingProfileImage),
                 _imageTile(
-                    label: 'Favicon', field: 'fav_icon', file: _favIconImage),
+                    label: 'Favicon', field: 'fav_icon', file: _favIconImage, networkUrl: _existingFavIcon),
                 _imageTile(
-                    label: 'Logo (Dark)', field: 'logo_dark', file: _logoDarkImage),
+                    label: 'Logo (Dark)', field: 'logo_dark', file: _logoDarkImage, networkUrl: _existingLogoDark),
                 _imageTile(
-                    label: 'Logo (Light)', field: 'logo_light', file: _logoLightImage),
+                    label: 'Logo (Light)', field: 'logo_light', file: _logoLightImage, networkUrl: _existingLogoLight),
                 const SizedBox(height: 16),
                 BlocBuilder<ProfileBloc, ProfileState>(
                   builder: (context, state) => SizedBox(
                     width: double.infinity,
+                    height: 48,
                     child: ElevatedButton(
                       onPressed: state.isLoading ? null : _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black87,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
                       child: state.isLoading
                           ? const SizedBox(
                               height: 20,
                               width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                             )
-                          : const Text('Update'),
+                          : const Text('Update', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ),

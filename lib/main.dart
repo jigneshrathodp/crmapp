@@ -11,15 +11,7 @@ import 'bloc/notification_bloc.dart';
 import 'bloc/order_bloc.dart';
 import 'bloc/product_bloc.dart';
 import 'bloc/profile_bloc.dart';
-import 'screens/splash_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/dashboard_screen.dart';
-import 'screens/notification_screen.dart';
-import 'screens/profile/profile_screen.dart';
-import 'screens/category/category_list_screen.dart';
-import 'screens/product/product_list_screen.dart';
-import 'screens/order/order_list_screen.dart';
-import 'screens/ads/ads_list_screen.dart';
+import 'routes.dart';
 
 void main() {
   runApp(const MyApp());
@@ -52,18 +44,8 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        initialRoute: '/',
-        routes: {
-          '/': (context) => const SplashScreen(),
-          '/login': (context) => const LoginScreen(),
-          '/dashboard': (context) => const DashboardScreen(),
-          '/categories': (context) => const CategoryListScreen(),
-          '/products': (context) => const ProductListScreen(),
-          '/orders': (context) => const OrderListScreen(),
-          '/advertisements': (context) => const AdsListScreen(),
-          '/profile': (context) => const ProfileScreen(),
-          '/notifications': (context) => const NotificationScreen(),
-        },
+        initialRoute: AppRoutes.splash,
+        onGenerateRoute: AppRoutes.onGenerateRoute,
       ),
     );
   }

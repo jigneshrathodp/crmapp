@@ -68,13 +68,7 @@ class _NotificationScreenState extends State<NotificationScreen>
             icon: const Icon(Icons.mark_email_read),
             onPressed: () {
               context.read<NotificationBloc>().add(MarkAllNotificationsRead());
-              Future.delayed(const Duration(milliseconds: 300), () {
-                if (mounted) {
-                  context
-                      .read<NotificationBloc>()
-                      .add(GetUnreadNotifications());
-                }
-              });
+              context.read<NotificationBloc>().add(GetUnreadNotifications());
             },
             tooltip: 'Mark all as read',
           ),

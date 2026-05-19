@@ -71,10 +71,10 @@ class Product {
 
   Product.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    name = json['name'];
-    category = json['category'];
-    image = json['image'];
-    weightInGram = json['weight_in_gram'];
+    name = json['name']?.toString();
+    category = json['category']?.toString();
+    image = (json['image'] ?? json['image_url'] ?? '').toString();
+    weightInGram = json['weight_in_gram']?.toString();
   }
 
   Map<String, dynamic> toJson() {
@@ -97,10 +97,10 @@ class Customer {
   Customer({this.name, this.phone, this.email, this.address});
 
   Customer.fromJson(Map<String, dynamic> json) {
-    name = json['name'];
-    phone = json['phone'];
-    email = json['email'];
-    address = json['address'];
+    name = json['name']?.toString();
+    phone = json['phone']?.toString();
+    email = (json['email'] ?? json['customer_email'] ?? '').toString();
+    address = json['address']?.toString();
   }
 
   Map<String, dynamic> toJson() {

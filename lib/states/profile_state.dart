@@ -1,5 +1,8 @@
 import 'package:equatable/equatable.dart';
 
+// Sentinel – differentiates "not passed" from explicitly-null in copyWith.
+const _sentinel = Object();
+
 class ProfileState extends Equatable {
   final bool isLoading;
   final Map<String, dynamic>? profileDetails;
@@ -14,12 +17,12 @@ class ProfileState extends Equatable {
   ProfileState copyWith({
     bool? isLoading,
     Map<String, dynamic>? profileDetails,
-    String? error,
+    Object? error = _sentinel,
   }) {
     return ProfileState(
       isLoading: isLoading ?? this.isLoading,
       profileDetails: profileDetails ?? this.profileDetails,
-      error: error ?? this.error,
+      error: identical(error, _sentinel) ? this.error : error as String?,
     );
   }
 

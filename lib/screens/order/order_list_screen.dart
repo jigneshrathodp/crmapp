@@ -32,6 +32,7 @@ class _OrderListScreenState extends State<OrderListScreen> with DrawerNavigation
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
+      backgroundColor: Colors.white,
       appBar: CustomAppBar(
         title: 'Orders',
         onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
@@ -53,7 +54,9 @@ class _OrderListScreenState extends State<OrderListScreen> with DrawerNavigation
       body: BlocBuilder<OrderBloc, OrderState>(
         builder: (context, state) {
           if (state.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.black87),
+            );
           }
 
           if (state.error != null) {
@@ -61,11 +64,21 @@ class _OrderListScreenState extends State<OrderListScreen> with DrawerNavigation
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Error: ${state.error}'),
+                  const Icon(Icons.error_outline, size: 56, color: Colors.black38),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Error: ${state.error}',
+                    style: const TextStyle(color: Colors.black54),
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () =>
                         context.read<OrderBloc>().add(GetOrderList()),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black87,
+                      foregroundColor: Colors.white,
+                    ),
                     child: const Text('Retry'),
                   ),
                 ],
@@ -79,11 +92,24 @@ class _OrderListScreenState extends State<OrderListScreen> with DrawerNavigation
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('No orders found'),
+                  const Icon(Icons.shopping_cart_outlined, size: 64, color: Colors.black26),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'No Data Available',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black54,
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () =>
                         context.read<OrderBloc>().add(GetOrderList()),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black87,
+                      foregroundColor: Colors.white,
+                    ),
                     child: const Text('Refresh'),
                   ),
                 ],
@@ -104,19 +130,29 @@ class _OrderListScreenState extends State<OrderListScreen> with DrawerNavigation
                   builder: (context) =>
                       OrderDetailScreen(orderId: order.orderId!),
                 ),
-              ).then((_) => context.read<OrderBloc>().add(GetOrderList()));
+              ).then((_) {
+                if (context.mounted) {
+                  context.read<OrderBloc>().add(GetOrderList());
+                }
+              });
             },
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.black87,
+        foregroundColor: Colors.white,
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const CreateOrderScreen(),
             ),
-          ).then((_) => context.read<OrderBloc>().add(GetOrderList()));
+          ).then((_) {
+            if (context.mounted) {
+              context.read<OrderBloc>().add(GetOrderList());
+            }
+          });
         },
         child: const Icon(Icons.add),
       ),

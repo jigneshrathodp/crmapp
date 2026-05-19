@@ -17,7 +17,12 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   ) async {
     emit(state.copyWith(isLoading: true, error: null));
     try {
-      final dashboard = await _apiCalls.getDashboard();
+      final raw = await _apiCalls.getDashboard();
+      // API: { status, message, data: { stats: {...}, profile: {...}, ... } }
+      // Store the inner 'data' object so screens can access data['stats'] etc.
+      final dashboard = raw['data'] is Map
+          ? Map<String, dynamic>.from(raw['data'] as Map)
+          : raw;
       emit(state.copyWith(isLoading: false, dashboardData: dashboard));
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: e.toString()));

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/api_logger.dart';
 
 class BaseApi {
   final String baseUrl;
@@ -33,10 +34,16 @@ class BaseApi {
   }) async {
     final url = Uri.parse('$baseUrl$endpoint');
     final defaultHeaders = await _getAuthHeaders();
+    final finalHeaders = headers ?? defaultHeaders;
+    
+    ApiLogger.logRequest('GET', url, headers: finalHeaders);
+    
     final response = await http.get(
       url,
-      headers: headers ?? defaultHeaders,
+      headers: finalHeaders,
     );
+    
+    ApiLogger.logResponse(response);
     return response;
   }
 
@@ -48,17 +55,23 @@ class BaseApi {
   }) async {
     final url = Uri.parse('$baseUrl$endpoint');
     final defaultHeaders = await _getAuthHeaders();
+    final finalHeaders = headers ?? defaultHeaders;
     String? encodedBody;
     if (body is Map<String, dynamic>) {
       encodedBody = jsonEncode(body);
     } else if (body is String) {
       encodedBody = body;
     }
+    
+    ApiLogger.logRequest('POST', url, headers: finalHeaders, body: encodedBody);
+    
     final response = await http.post(
       url,
-      headers: headers ?? defaultHeaders,
+      headers: finalHeaders,
       body: encodedBody,
     );
+    
+    ApiLogger.logResponse(response);
     return response;
   }
 
@@ -77,8 +90,14 @@ class BaseApi {
     }
     if (fields != null) request.fields.addAll(fields);
     if (files != null) request.files.addAll(files);
+    
+    ApiLogger.logMultipartRequest('POST', uri, fields: fields, files: files);
+    
     final streamedResponse = await request.send();
-    return http.Response.fromStream(streamedResponse);
+    final response = await http.Response.fromStream(streamedResponse);
+    
+    ApiLogger.logResponse(response);
+    return response;
   }
 
   // PUT request (JSON body)
@@ -89,17 +108,23 @@ class BaseApi {
   }) async {
     final url = Uri.parse('$baseUrl$endpoint');
     final defaultHeaders = await _getAuthHeaders();
+    final finalHeaders = headers ?? defaultHeaders;
     String? encodedBody;
     if (body is Map<String, dynamic>) {
       encodedBody = jsonEncode(body);
     } else if (body is String) {
       encodedBody = body;
     }
+    
+    ApiLogger.logRequest('PUT', url, headers: finalHeaders, body: encodedBody);
+    
     final response = await http.put(
       url,
-      headers: headers ?? defaultHeaders,
+      headers: finalHeaders,
       body: encodedBody,
     );
+    
+    ApiLogger.logResponse(response);
     return response;
   }
 
@@ -110,10 +135,16 @@ class BaseApi {
   }) async {
     final url = Uri.parse('$baseUrl$endpoint');
     final defaultHeaders = await _getAuthHeaders();
+    final finalHeaders = headers ?? defaultHeaders;
+    
+    ApiLogger.logRequest('DELETE', url, headers: finalHeaders);
+    
     final response = await http.delete(
       url,
-      headers: headers ?? defaultHeaders,
+      headers: finalHeaders,
     );
+    
+    ApiLogger.logResponse(response);
     return response;
   }
 }

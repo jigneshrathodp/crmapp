@@ -6,6 +6,11 @@ import 'package:http/http.dart' as http;
 import '../../bloc/product_bloc.dart';
 import '../../events/product_events.dart';
 import '../../states/product_state.dart';
+import '../../widgets/custom_app_bar.dart';
+import '../../widgets/custom_drawer.dart';
+import '../notification_screen.dart';
+import '../profile/profile_screen.dart';
+import '../../utils/navigation_mixin.dart';
 
 class CreateProductScreen extends StatefulWidget {
   const CreateProductScreen({super.key});
@@ -14,7 +19,8 @@ class CreateProductScreen extends StatefulWidget {
   State<CreateProductScreen> createState() => _CreateProductScreenState();
 }
 
-class _CreateProductScreenState extends State<CreateProductScreen> {
+class _CreateProductScreenState extends State<CreateProductScreen> with DrawerNavigationMixin {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _categoryController = TextEditingController();
@@ -26,6 +32,23 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
   bool _forSale = true;
   File? _selectedImage;
   final _picker = ImagePicker();
+
+  static const _border = OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(8)),
+    borderSide: BorderSide(color: Colors.black26),
+  );
+  static const _focusBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(8)),
+    borderSide: BorderSide(color: Colors.black87, width: 1.5),
+  );
+
+  InputDecoration _dec(String label) => InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.black54),
+        border: _border,
+        enabledBorder: _border,
+        focusedBorder: _focusBorder,
+      );
 
   @override
   void dispose() {
@@ -40,64 +63,67 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
 
   Future<void> _pickImage() async {
     final picked = await _picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      setState(() => _selectedImage = File(picked.path));
-    }
+    if (picked != null) setState(() => _selectedImage = File(picked.path));
   }
 
   Future<void> _submit() async {
-    if (_formKey.currentState!.validate()) {
-      if (_selectedImage == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a product image')),
-        );
-        return;
-      }
-      final imageFile = await http.MultipartFile.fromPath(
-        'image',
-        _selectedImage!.path,
+    if (!_formKey.currentState!.validate()) return;
+    if (_selectedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a product image'), backgroundColor: Colors.black87),
       );
-      if (!mounted) return;
-
-      final fields = <String, String>{
-        'name': _nameController.text,
-        'category': _categoryController.text,
-        'qnty': _qntyController.text,
-        'weight_in_gram': _weightInGramController.text,
-        'cost_per_gram': _costPerGramController.text,
-        'sts': _isActive ? '1' : '0',
-        'for_sale': _forSale ? '1' : '0',
-      };
-      if (_sellPriceController.text.isNotEmpty) {
-        fields['sell_price'] = _sellPriceController.text;
-      }
-
-      context.read<ProductBloc>().add(
-        CreateProduct(fields, imageFile: imageFile),
-      );
-      Navigator.pop(context);
+      return;
     }
+    final imageFile = await http.MultipartFile.fromPath('image', _selectedImage!.path);
+    if (!mounted) return;
+    final fields = <String, String>{
+      'name': _nameController.text,
+      'category': _categoryController.text,
+      'qnty': _qntyController.text,
+      'weight_in_gram': _weightInGramController.text,
+      'cost_per_gram': _costPerGramController.text,
+      'sts': _isActive ? '1' : '0',
+      'for_sale': _forSale ? '1' : '0',
+    };
+    if (_sellPriceController.text.isNotEmpty) fields['sell_price'] = _sellPriceController.text;
+    context.read<ProductBloc>().add(CreateProduct(fields, imageFile: imageFile));
+    // Let BlocListener handle snackbar and navigation.
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Product'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 1,
+      key: _scaffoldKey,
+      backgroundColor: Colors.white,
+      appBar: CustomAppBar(
+        title: 'Create Product',
+        onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        onNotificationPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const NotificationScreen()),
+        ),
+        onProfilePressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        ),
+      ),
+      drawer: CustomDrawer(
+        selectedIndex: 3,
+        onItemTapped: onDrawerItemTapped,
+        headerTitle: 'CRM App',
+        headerSubtitle: 'Create Product',
       ),
       body: BlocListener<ProductBloc, ProductState>(
         listener: (context, state) {
           if (!state.isLoading && state.error == null && state.createdProduct != null) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Product created successfully')),
+              const SnackBar(content: Text('Product created successfully'), backgroundColor: Colors.black87),
             );
+            Navigator.pop(context);
           }
           if (state.error != null) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: ${state.error}')),
+              SnackBar(content: Text('Error: ${state.error}'), backgroundColor: Colors.black87),
             );
           }
         },
@@ -107,90 +133,68 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
             key: _formKey,
             child: ListView(
               children: [
-                // Image picker
                 GestureDetector(
                   onTap: _pickImage,
                   child: Container(
                     height: 160,
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
+                      border: Border.all(color: Colors.black26),
                       borderRadius: BorderRadius.circular(8),
+                      color: Colors.grey.shade50,
                     ),
                     child: _selectedImage != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(8),
-                            child: Image.file(
-                              _selectedImage!,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                            ),
+                            child: Image.file(_selectedImage!, fit: BoxFit.cover, width: double.infinity),
                           )
                         : const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.add_photo_alternate,
-                                  size: 48, color: Colors.grey),
+                              Icon(Icons.add_photo_alternate, size: 48, color: Colors.black38),
                               SizedBox(height: 8),
-                              Text('Tap to select image (required)',
-                                  style: TextStyle(color: Colors.grey)),
+                              Text('Tap to select image (required)', style: TextStyle(color: Colors.black45)),
                             ],
                           ),
                   ),
                 ),
                 const SizedBox(height: 12),
-                TextFormField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Name'),
-                  validator: (value) =>
-                      value?.isEmpty ?? true ? 'Name is required' : null,
-                ),
-                TextFormField(
-                  controller: _categoryController,
-                  decoration: const InputDecoration(labelText: 'Category ID'),
-                  keyboardType: TextInputType.number,
-                  validator: (value) =>
-                      value?.isEmpty ?? true ? 'Category ID is required' : null,
-                ),
-                TextFormField(
-                  controller: _qntyController,
-                  decoration: const InputDecoration(labelText: 'Quantity'),
-                  keyboardType: TextInputType.number,
-                  validator: (value) =>
-                      value?.isEmpty ?? true ? 'Quantity is required' : null,
-                ),
-                TextFormField(
-                  controller: _weightInGramController,
-                  decoration: const InputDecoration(labelText: 'Weight (gram)'),
-                  keyboardType: TextInputType.number,
-                  validator: (value) =>
-                      value?.isEmpty ?? true ? 'Weight is required' : null,
-                ),
-                TextFormField(
-                  controller: _costPerGramController,
-                  decoration: const InputDecoration(labelText: 'Cost per Gram'),
-                  keyboardType: TextInputType.number,
-                  validator: (value) =>
-                      value?.isEmpty ?? true ? 'Cost per gram is required' : null,
-                ),
-                TextFormField(
-                  controller: _sellPriceController,
-                  decoration: const InputDecoration(
-                    labelText: 'Sell Price (optional)',
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-                SwitchListTile(
-                  title: const Text('Active'),
-                  value: _isActive,
-                  onChanged: (val) => setState(() => _isActive = val),
-                ),
-                SwitchListTile(
-                  title: const Text('For Sale'),
-                  value: _forSale,
-                  onChanged: (val) => setState(() => _forSale = val),
-                ),
+                TextFormField(controller: _nameController, decoration: _dec('Name'),
+                    validator: (v) => v?.isEmpty ?? true ? 'Name is required' : null),
+                const SizedBox(height: 12),
+                TextFormField(controller: _categoryController, decoration: _dec('Category ID'),
+                    keyboardType: TextInputType.number,
+                    validator: (v) => v?.isEmpty ?? true ? 'Category ID is required' : null),
+                const SizedBox(height: 12),
+                TextFormField(controller: _qntyController, decoration: _dec('Quantity'),
+                    keyboardType: TextInputType.number,
+                    validator: (v) => v?.isEmpty ?? true ? 'Quantity is required' : null),
+                const SizedBox(height: 12),
+                TextFormField(controller: _weightInGramController, decoration: _dec('Weight (gram)'),
+                    keyboardType: TextInputType.number,
+                    validator: (v) => v?.isEmpty ?? true ? 'Weight is required' : null),
+                const SizedBox(height: 12),
+                TextFormField(controller: _costPerGramController, decoration: _dec('Cost per Gram'),
+                    keyboardType: TextInputType.number,
+                    validator: (v) => v?.isEmpty ?? true ? 'Cost per gram is required' : null),
+                const SizedBox(height: 12),
+                TextFormField(controller: _sellPriceController, decoration: _dec('Sell Price (optional)'),
+                    keyboardType: TextInputType.number),
+                SwitchListTile(title: const Text('Active'), value: _isActive,
+                    activeThumbColor: Colors.black87, onChanged: (v) => setState(() => _isActive = v)),
+                SwitchListTile(title: const Text('For Sale'), value: _forSale,
+                    activeThumbColor: Colors.black87, onChanged: (v) => setState(() => _forSale = v)),
                 const SizedBox(height: 16),
-                ElevatedButton(onPressed: _submit, child: const Text('Create')),
+                SizedBox(
+                  width: double.infinity, height: 48,
+                  child: ElevatedButton(
+                    onPressed: _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black87, foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: const Text('Create', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                  ),
+                ),
               ],
             ),
           ),
